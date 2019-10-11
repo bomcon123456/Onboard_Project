@@ -1,6 +1,6 @@
 from ma import ma
 
 
-class UserSchema(ma.Schema):
+class CategorySchema(ma.Schema):
     class Meta:
-        fields = ('id', 'username', 'name')
+        fields = ('id', 'title', 'description')

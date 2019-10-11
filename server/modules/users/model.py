@@ -1,5 +1,3 @@
-import os
-
 from passlib.hash import bcrypt
 
 from db import db
