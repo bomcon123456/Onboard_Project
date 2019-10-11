@@ -4,7 +4,7 @@ from modules.users.model import User
 
 
 def authenticate(username, password):
-    user = User.find_by_username(username)
+    user = User.query.filter_by(username=username).first()
     if user and bcrypt.verify(password, user.hashed_password):
         return user
 
