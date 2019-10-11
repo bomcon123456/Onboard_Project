@@ -1,0 +1,6 @@
+server/venv/
+*.pyc
+**/__pycache__
+server/.idea
+server/.env
+.DS_Store
