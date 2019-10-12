@@ -33,7 +33,8 @@ def register():
     :bodyparam password: password of the user
     :bodyparam name: name of the user
 
-    :raise ValidationError: If body of request is messed up
+    :raise ValidationError 400: If body of request is messed up
+    :raise IntegrityError1062 400: If try to create an existed user
     :return: id of the newly created user
     """
     data = request.get_json()
