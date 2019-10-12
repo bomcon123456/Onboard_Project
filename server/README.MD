@@ -28,6 +28,6 @@ You can see endpoints and its request/response example here:
 ![Entity-R](../Markdown/Onboard_EntityRelation.png)
 
 ### Project folder structure:
-![Folder-Structure](../Markdown/ServerStructure.png)
+![Folder-Structure](../Markdown/ServerStructure2.png)
 
 
