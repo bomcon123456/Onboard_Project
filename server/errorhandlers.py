@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify
-from flask_jwt import JWTError
 from marshmallow import ValidationError
 from sqlalchemy import exc
 
@@ -47,10 +46,11 @@ def handle_database_error(error):
         response.status_code = 500
     return response
 
-# @error_handlers.app_errorhandler(Exception)
-# def handle_all_errors(error):
-#     response = jsonify({
-#         'error': '[ERROR]: Internal Server Error.'
-#     })
-#     response.status_code = 500
-#     return response
+
+@error_handlers.app_errorhandler(Exception)
+def handle_all_errors(error):
+    response = jsonify({
+        'error': '[ERROR]: Internal Server Error.'
+    })
+    response.status_code = 500
+    return response

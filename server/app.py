@@ -4,11 +4,10 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_jwt import JWT
 
+from errorhandlers import error_handlers
 from modules.categories.controller import category_api
 from modules.items.controller import item_api
 from modules.users.controller import user_api
-from errorhandlers import error_handlers
-
 from security import authenticate, identity
 
 app = Flask(__name__)
