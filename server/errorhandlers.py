@@ -13,16 +13,6 @@ def handle_not_found(error):
     return error.to_response()
 
 
-@error_handlers.app_errorhandler(JWTError)
-def handle_unauthorized(error):
-    response = jsonify({
-        'error': 'Unauthorized',
-        'description': 'Please sign in to do this action.',
-    })
-    response.status_code = 401
-    return response
-
-
 @error_handlers.app_errorhandler(403)
 def handle_forbidden(error):
     response = jsonify({

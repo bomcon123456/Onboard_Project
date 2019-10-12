@@ -42,7 +42,7 @@ def get_one(_id):
     GET one method for Category
     :param _id: id of the category
 
-    :raise: Not found
+    :raise Not Found 404: If id is not valid
     :return: Item with that id
     """
     item = Item.find_by_id(_id)
@@ -67,6 +67,8 @@ def post():
     :bodypram category_id: Category of the item
 
     :raise: ValidationError if form is messed up
+    :raise Unauthorized 401: If not login
+    :raise Forbidden 403: If user tries to delete other user's items
     :return: id of the newly created item
     """
     body = request.get_json()
@@ -96,6 +98,8 @@ def put(_id):
     :bodyparam description: Description of the item
 
     :raise: ValidationError if form is messed up
+    :raise Unauthorized 401: If not login
+    :raise Forbidden 403: If user tries to delete other user's items
     :return: id of the newly created item
     """
     body = request.get_json()
@@ -127,6 +131,8 @@ def delete(_id):
     DELETE method for Item
     :param _id: ID of the item we want to delete
 
+    :raise Unauthorized 401: If not login
+    :raise Forbidden 403: If user tries to delete other user's items
     :return: 204 response
     """
     item = Item.find_by_id(_id)
