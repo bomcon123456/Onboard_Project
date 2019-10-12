@@ -9,10 +9,20 @@ This is a Python Flask Application. It serves multiple endpoints allowing user t
 ## How to install:
 You should create a virtual environment so that it will not affect other projects.
 ``` 
-Create virtual env: 
+1. Create virtual env: 
 virtualenv venv --python=python3
-Install pip modules:
+2. Install pip modules:
 pip install -r requirements.txt
+3. Fulfill ENVIRONMENT variables, we support loading from .env file placed in the server/ folder:
+DATABASE_URL='SOME_URL'
+APP_SECRET_KEY='SOME_KEY'
+4. Install any MySQL connector like:
+- PyMySQL
+- MySQLdb
+- mysql-connector-python
+- Then remember to update the DATABASE_URL to tell which connector you are using:
+'mysql+connector://...'
+5. Since Flask-SQLAlchemy can't automatically create a new database, you should create it by yourself.
 ```
 ## How to run:
 ``` 
