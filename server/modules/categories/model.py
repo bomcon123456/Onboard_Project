@@ -1,5 +1,3 @@
-from passlib.hash import bcrypt
-
 from db import db
 from common.mixins.basemodelmixin import ModelMixin
 
