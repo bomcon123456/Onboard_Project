@@ -10,6 +10,13 @@ user_api = Blueprint('users', __name__)
 @user_api.route('', methods=['GET'])
 @jwt_required()
 def get_authen_user():
+    """
+    GET authenticated user
+    :requires: Login-ed user
+
+    :raise Unauthorized 401: If user is not login-ed
+    :return: Information of login-ed user
+    """
     result = UserSchema().dump(current_identity)
     return {
         'message': 'Fetch authen user successfully.',
@@ -19,6 +26,16 @@ def get_authen_user():
 
 @user_api.route('', methods=['POST'])
 def register():
+    """
+    Create new user
+
+    :bodyparam username: username of the user
+    :bodyparam password: password of the user
+    :bodyparam name: name of the user
+
+    :raise ValidationError: If body of request is messed up
+    :return: id of the newly created user
+    """
     data = request.get_json()
     UserRegisterSchema().load(data)
 
