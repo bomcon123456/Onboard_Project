@@ -8,8 +8,8 @@ class ItemSchema(Schema):
     title = fields.String(validate=validate.Length(min=4, max=30), required=True)
     description = fields.String(validate=validate.Length(min=4, max=256), required=True)
     category_id = fields.Integer(required=True)
-    user_id = fields.Integer(required=True)
-    seller = fields.Nested(UserSchema(only=['name']))
+    # user_id = fields.Integer(required=True)
+    seller = fields.Nested(UserSchema(only=['name', 'id']))
 
     class Meta:
         strict = True
