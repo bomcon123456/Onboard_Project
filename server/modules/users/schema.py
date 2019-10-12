@@ -11,6 +11,7 @@ class UserRegisterSchema(Schema):
 
 
 class UserSchema(Schema):
+    id = fields.Str(required=True, dump_only=True)
     username = fields.Str(validate=validate.Length(min=4), required=True)
     name = fields.Str(validate=validate.Length(min=4), required=True)
 
