@@ -11,7 +11,7 @@ class User(ModelMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     hashed_password = db.Column(db.String(80), nullable=False)
-    items = db.relationship('Item', backref="author", lazy='dynamic')
+    items = db.relationship('Item', backref="seller", lazy='dynamic')
 
     def __init__(self, **kwargs):
         """
