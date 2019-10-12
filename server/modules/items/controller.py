@@ -1,6 +1,7 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, abort
 from flask_jwt import jwt_required, current_identity
 
+from common.customexceptions import NotFound
 from .model import Item
 from .schema import ItemSchema
 
@@ -35,12 +36,32 @@ def get():
     }
 
 
+@item_api.route('<int:_id>', methods=['GET'])
+def get_one(_id):
+    """
+    GET one method for Category
+    :param _id: id of the category
+
+    :raise: Not found
+    :return: Item with that id
+    """
+    item = Item.find_by_id(_id)
+    if item is None:
+        raise NotFound(message='Item with this id doesn\'t exists.')
+    else:
+        return {
+            'message': 'Fetch item successfully.',
+            'data': item_schema.dump(item)
+        }
+
+
 @item_api.route('', methods=['POST'])
 @jwt_required()
 def post():
     """
     POST method for Item
-    :requires: login
+    :requires: must be login-ed
+
     :bodyparam title: Title of the item
     :bodyparam description: Description of the item
     :bodypram category_id: Category of the item
@@ -62,11 +83,15 @@ def post():
     }
 
 
-@item_api.route('/<int:id>', methods=['PUT'])
-def put(id):
+@item_api.route('/<int:_id>', methods=['PUT'])
+@jwt_required()
+def put(_id):
     """
     PUT method for Item
-    :param id: ID of the item we want to update
+    :requires: the login-ed user must be the one created this item
+
+    :param _id: ID of the item we want to update
+
     :bodyparam title: Title of the item
     :bodyparam description: Description of the item
 
@@ -77,10 +102,13 @@ def put(id):
 
     item_schema.load(body)
 
-    item = Item.find_by_id(id)
+    item = Item.find_by_id(_id)
     if item is None:
+        body['user_id'] = current_identity.id
         item = Item(**body)
     else:
+        if item.user_id != current_identity.id:
+            abort(403)
         item.title = body.get('title', item.title)
         item.description = body.get('description', item.description)
 
@@ -92,20 +120,23 @@ def put(id):
     }
 
 
-@item_api.route('/<int:id>', methods=['DELETE'])
-def delete(id):
+@item_api.route('/<int:_id>', methods=['DELETE'])
+@jwt_required()
+def delete(_id):
     """
     DELETE method for Item
-    :param id: ID of the item we want to delete
+    :param _id: ID of the item we want to delete
 
     :return: 204 response
     """
-    item = Item.find_by_id(id)
+    item = Item.find_by_id(_id)
     if item is None:
         return {
                    'message': 'This item doesn\'t exist.',
                }, 404
     else:
+        if item.user_id != current_identity.id:
+            abort(403)
         item.delete()
 
     return {

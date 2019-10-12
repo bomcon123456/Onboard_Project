@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from common.customexceptions import NotFound
 from .model import Category
 from .schema import CategorySchema
 from ..items.schema import ItemSchema
@@ -47,7 +48,7 @@ def get_one(id):
 
     category = Category.find_by_id(id)
     if category is None:
-        raise Exception()
+        raise NotFound(message='Category with this id doesn\'t exist.')
     else:
         return {
             'message': 'Fetch category successfully.',
