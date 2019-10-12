@@ -29,6 +29,7 @@ You can see endpoints and its request/response example here:
 
 ### Project folder structure:
 ![Folder-Structure](../Markdown/ServerStructure2.png)
+
 In each resource in modules, it usually has:
 - **init.py**: declare this resource folder is a package
 - **model.py**:declare how this resource is represented in the database
