@@ -41,7 +41,7 @@ def get_one(_id):
     GET one method for Category
     :param _id: id of the category want to get
 
-    :raise: Not found
+    :raise Not Found 404: If category with that id doesn't exist
     :return: Category with that id
     """
 
@@ -62,7 +62,7 @@ def post():
     :bodyparam title: Title of the category
     :bodyparam description: Description of the category
 
-    :raise: ValidationError if form is messed up
+    :raise ValidationError 400: if form is messed up
     :return: id of the newly created category
     """
     body = request.get_json()
@@ -86,7 +86,7 @@ def put(_id):
     :bodyparam title: Title of the category
     :bodyparam description: Description of the category
 
-    :raise: ValidationError if form is messed up
+    :raise ValidationError 400: if form is messed up
     :return: id of the newly created category
     """
     body = request.get_json()
@@ -114,13 +114,12 @@ def delete(_id):
     DELETE method for Category
     :param _id: ID of the category we want to delete
 
+    :raise Not Found 404: If category with that id doesn't exist
     :return: 204 response
     """
     category = Category.find_by_id(_id)
     if category is None:
-        return {
-                   'message': 'This category doesn\'t exist.',
-               }, 404
+        raise NotFound(message='Category with this id doesn\'t exist.')
     else:
         category.delete()
 

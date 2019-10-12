@@ -19,7 +19,7 @@ def get():
     :queryparam page: page that client wants to get, default = 1
     :queryparam size: item per page that client wants to get, default = 5
 
-    :return: List of categories, currentPage, perPage, total.
+    :return: List of items, currentPage, perPage, total.
     """
     page = request.args.get('page', 1)
     size = request.args.get('size', 5)
@@ -28,7 +28,7 @@ def get():
     result = categories_schema.dump(paginator.items)
 
     return {
-        'message': 'Fetch categories successfully.',
+        'message': 'Fetch items successfully.',
         'data': result,
         'currentPage': paginator.page,
         'perPage': paginator.per_page,
@@ -42,7 +42,7 @@ def get_one(_id):
     GET one method for Category
     :param _id: id of the category
 
-    :raise Not Found 404: If id is not valid
+    :raise Not Found 404: If item with that id doesn't exist
     :return: Item with that id
     """
     item = Item.find_by_id(_id)
@@ -103,18 +103,19 @@ def put(_id):
     :return: id of the newly created item
     """
     body = request.get_json()
+    body['user_id'] = current_identity.id
 
     item_schema.load(body)
 
     item = Item.find_by_id(_id)
     if item is None:
-        body['user_id'] = current_identity.id
         item = Item(**body)
     else:
         if item.user_id != current_identity.id:
             abort(403)
         item.title = body.get('title', item.title)
         item.description = body.get('description', item.description)
+        item.category_id = body.get('category_id', item.category_id)
 
     item.save()
 
@@ -131,15 +132,14 @@ def delete(_id):
     DELETE method for Item
     :param _id: ID of the item we want to delete
 
+    :raise Not Found 404: If item with that id doesn't exist
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
     :return: 204 response
     """
     item = Item.find_by_id(_id)
     if item is None:
-        return {
-                   'message': 'This item doesn\'t exist.',
-               }, 404
+        raise NotFound(message='Item with this id doesn\'t exists.')
     else:
         if item.user_id != current_identity.id:
             abort(403)

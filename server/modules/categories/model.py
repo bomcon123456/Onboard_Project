@@ -1,5 +1,5 @@
-from db import db
 from common.mixins.basemodelmixin import ModelMixin
+from db import db
 
 
 class Category(ModelMixin, db.Model):
