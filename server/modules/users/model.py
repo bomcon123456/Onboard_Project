@@ -2,6 +2,7 @@ from passlib.hash import bcrypt
 
 from db import db
 from common.mixins.basemodelmixin import ModelMixin
+from ..items.model import Item
 
 
 class User(ModelMixin, db.Model):
@@ -11,8 +12,7 @@ class User(ModelMixin, db.Model):
     username = db.Column(db.String(80), unique=True)
     name = db.Column(db.String(80))
     hashed_password = db.Column(db.String(80))
-
-    # items = db.relationship('Item', lazy='dynamic')
+    items = db.relationship('Item', lazy=False)
 
     def __init__(self, **kwargs):
         """

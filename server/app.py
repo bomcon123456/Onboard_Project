@@ -1,5 +1,4 @@
 import os
-import re
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify
@@ -9,6 +8,8 @@ from sqlalchemy import exc
 
 from modules.register.controller import register_api
 from modules.categories.controller import category_api
+from modules.items.controller import item_api
+
 from security import authenticate, identity
 
 app = Flask(__name__)
@@ -42,7 +43,17 @@ def handle_database_error(error):
     return response
 
 
+@app.errorhandler(Exception)
+def handle_all_errors(error):
+    response = jsonify({
+        'message': '[ERROR]: Internal Server Error.'
+    })
+    response.status_code = 500
+    return response
+
+
 app.register_blueprint(register_api, url_prefix='/register')
 app.register_blueprint(category_api, url_prefix='/categories')
+app.register_blueprint(item_api, url_prefix='/items')
 
 jwt = JWT(app, authenticate, identity)

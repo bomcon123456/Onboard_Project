@@ -1,7 +1,4 @@
-import logging
-
 from flask import Blueprint, request
-from marshmallow import ValidationError
 
 from ..users.model import User
 from ..users.schema import UserSchema, UserRegisterSchema
@@ -18,7 +15,7 @@ def register():
 
     user = User(**data)
     user.save()
-    
+
     return {
         'message': 'Registration completed.',
         'id': user.id

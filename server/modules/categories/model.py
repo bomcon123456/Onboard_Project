@@ -8,5 +8,4 @@ class Category(ModelMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(30))
     description = db.Column(db.String(256))
-
-    # items = db.relationship('Item', lazy='dynamic')
+    items = db.relationship('Item', backref='category', lazy=False)
