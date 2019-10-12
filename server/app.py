@@ -15,12 +15,13 @@ load_dotenv()
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['JWT_AUTH_URL_RULE'] = '/api/v1/auth'
 app.secret_key = os.environ.get('APP_SECRET_KEY')
 
 app.register_blueprint(error_handlers)
 
-app.register_blueprint(user_api, url_prefix='/users')
-app.register_blueprint(category_api, url_prefix='/categories')
-app.register_blueprint(item_api, url_prefix='/items')
+app.register_blueprint(user_api, url_prefix='/api/v1/users')
+app.register_blueprint(category_api, url_prefix='/api/v1/categories')
+app.register_blueprint(item_api, url_prefix='/api/v1/items')
 
 jwt = JWT(app, authenticate, identity)

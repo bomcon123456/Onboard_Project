@@ -18,13 +18,18 @@ def get():
 
     :queryparam page: page that client wants to get, default = 1
     :queryparam size: item per page that client wants to get, default = 5
+    :queryparam category_id: items of which category having id = category_id
 
     :return: List of items, currentPage, perPage, total.
     """
     page = request.args.get('page', 1)
     size = request.args.get('size', 5)
+    category_id = request.args.get('category_id', None)
+    query = {}
+    if category_id is not None:
+        query['category_id'] = category_id
 
-    paginator = Item.query.paginate(page, size, False)
+    paginator = Item.query.filter_by(**query).paginate(page, size, False)
     result = categories_schema.dump(paginator.items)
 
     return {
