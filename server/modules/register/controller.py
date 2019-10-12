@@ -1,11 +1,9 @@
 from flask import Blueprint, request
 
 from ..users.model import User
-from ..users.schema import UserSchema, UserRegisterSchema
+from ..users.schema import UserRegisterSchema
 
 register_api = Blueprint('register', __name__)
-
-user_schema = UserSchema()
 
 
 @register_api.route('', methods=['POST'])

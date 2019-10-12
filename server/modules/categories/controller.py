@@ -3,13 +3,11 @@ from flask import Blueprint, request
 from common.customexceptions import NotFound
 from .model import Category
 from .schema import CategorySchema
-from ..items.schema import ItemSchema
 
 category_api = Blueprint('category', __name__)
 
 category_schema = CategorySchema()
 categories_schema = CategorySchema(many=True)
-items_schema = ItemSchema(many=True)
 
 
 @category_api.route('', methods=['GET'])
@@ -37,16 +35,17 @@ def get():
     }
 
 
-@category_api.route('/<int:id>', methods=['GET'])
-def get_one(id):
+@category_api.route('/<int:_id>', methods=['GET'])
+def get_one(_id):
     """
     GET one method for Category
+    :param _id: id of the category want to get
 
     :raise: Not found
     :return: Category with that id
     """
 
-    category = Category.find_by_id(id)
+    category = Category.find_by_id(_id)
     if category is None:
         raise NotFound(message='Category with this id doesn\'t exist.')
     else:
@@ -79,11 +78,11 @@ def post():
     }
 
 
-@category_api.route('/<int:id>', methods=['PUT'])
-def put(id):
+@category_api.route('/<int:_id>', methods=['PUT'])
+def put(_id):
     """
     PUT method for Category
-    :param id: ID of the category we want to update
+    :param _id: ID of the category we want to update
     :bodyparam title: Title of the category
     :bodyparam description: Description of the category
 
@@ -94,7 +93,7 @@ def put(id):
 
     category_schema.load(body)
 
-    category = Category.find_by_id(id)
+    category = Category.find_by_id(_id)
     if category is None:
         category = Category(**body)
     else:
@@ -109,15 +108,15 @@ def put(id):
     }
 
 
-@category_api.route('/<int:id>', methods=['DELETE'])
-def delete(id):
+@category_api.route('/<int:_id>', methods=['DELETE'])
+def delete(_id):
     """
     DELETE method for Category
-    :param id: ID of the category we want to delete
+    :param _id: ID of the category we want to delete
 
     :return: 204 response
     """
-    category = Category.find_by_id(id)
+    category = Category.find_by_id(_id)
     if category is None:
         return {
                    'message': 'This category doesn\'t exist.',

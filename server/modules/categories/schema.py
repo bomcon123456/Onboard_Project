@@ -1,14 +1,12 @@
-from marshmallow import fields
+from marshmallow import Schema, fields, validate
 
-from ma import ma
-from .model import Category
 from ..items.schema import ItemSchema
 
 
-class CategorySchema(ma.Schema):
+class CategorySchema(Schema):
     id = fields.Integer()
-    title = fields.String()
-    description = fields.String()
+    title = fields.String(validate=validate.Length(min=4, max=30))
+    description = fields.String(validate=validate.Length(min=4, max=256))
     items = fields.List(fields.Nested(ItemSchema))
 
     class Meta:

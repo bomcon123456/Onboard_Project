@@ -1,9 +1,7 @@
 from db import db
-from ma import ma
 from app import app
 
 db.init_app(app)
-ma.init_app(app)
 
 
 @app.before_first_request
