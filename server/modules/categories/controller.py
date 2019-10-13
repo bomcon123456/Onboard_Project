@@ -91,12 +91,14 @@ def put(_id):
     """
     body = request.get_json()
 
-    category_schema.load(body)
-
     category = Category.find_by_id(_id)
     if category is None:
+        category_schema.load(body)
+
         category = Category(**body)
     else:
+        CategorySchema(partial=True).load(body)
+
         category.title = body.get('title', category.title)
         category.description = body.get('description', category.description)
 

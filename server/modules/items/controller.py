@@ -4,6 +4,7 @@ from flask_jwt import jwt_required, current_identity
 from common.customexceptions import NotFound
 from .model import Item
 from .schema import ItemSchema
+from ..categories.model import Category
 
 item_api = Blueprint('item', __name__)
 
@@ -74,12 +75,16 @@ def post():
     :raise: ValidationError if form is messed up
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
+    :raise NotFound 404: If category_id is not valid
     :return: id of the newly created item
     """
     body = request.get_json()
     body['user_id'] = current_identity.id
 
     item_schema.load(body)
+
+    if Category.find_by_id(body['category_id']) is None:
+        raise NotFound('Category with this id doesn\'t exist.')
 
     item = Item(**body)
     item.save()
@@ -105,22 +110,28 @@ def put(_id):
     :raise: ValidationError if form is messed up
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
+    :raise NotFound 404: If category_id is not valid
     :return: id of the newly created item
     """
     body = request.get_json()
     body['user_id'] = current_identity.id
-
-    item_schema.load(body)
+    category_id = body.get('category_id', None)
+    if category_id and Category.find_by_id(category_id) is None:
+        raise NotFound('Category with this id doesn\'t exist.')
 
     item = Item.find_by_id(_id)
     if item is None:
+        item_schema.load(body)
+
         item = Item(**body)
     else:
+        ItemSchema(partial=True).load(body)
+
         if item.user_id != current_identity.id:
             abort(403)
         item.title = body.get('title', item.title)
         item.description = body.get('description', item.description)
-        item.category_id = body.get('category_id', item.category_id)
+        item.category_id = category_id or item.category_id
 
     item.save()
 
