@@ -1,7 +1,7 @@
 from flask import Blueprint, request, abort
-from flask_jwt import jwt_required, current_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from common.customexceptions import NotFound
+from utils.customexceptions import NotFound, DuplicatedEntity
 from models.item import Item
 from schemas.item import ItemSchema
 from models.category import Category
@@ -19,25 +19,19 @@ def get():
 
     :queryparam page: page that client wants to get, default = 1
     :queryparam size: item per page that client wants to get, default = 5
-    :queryparam category_id: items of which category having id = category_id
 
-    :return: List of items, currentPage, perPage, total.
+    :return: List of items, current_page, per_page, total.
     """
     page = request.args.get('page', 1)
     size = request.args.get('size', 5)
-    category_id = request.args.get('category_id', None)
-    query = {}
-    if category_id is not None:
-        query['category_id'] = category_id
 
-    paginator = Item.query.filter_by(**query).paginate(page, size, False)
+    paginator = Item.query.paginate(page, size, False)
     result = categories_schema.dump(paginator.items)
 
     return {
-        'message': 'Fetch items successfully.',
         'data': result,
-        'currentPage': paginator.page,
-        'perPage': paginator.per_page,
+        'current_page': paginator.page,
+        'per_page': paginator.per_page,
         'total': paginator.total
     }
 
@@ -56,13 +50,12 @@ def get_one(_id):
         raise NotFound(message='Item with this id doesn\'t exists.')
     else:
         return {
-            'message': 'Fetch item successfully.',
             'data': item_schema.dump(item)
         }
 
 
 @item_api.route('', methods=['POST'])
-@jwt_required()
+@jwt_required
 def post():
     """
     POST method for Item
@@ -72,31 +65,34 @@ def post():
     :bodyparam description: Description of the item
     :bodypram category_id: Category of the item
 
-    :raise: ValidationError if form is messed up
+    :raise: ValidationError 400: if form is messed up
+    :raise DuplicatedEntity 400: If try to create an existed object.
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
     :raise NotFound 404: If category_id is not valid
     :return: id of the newly created item
     """
     body = request.get_json()
-    body['user_id'] = current_identity.id
+    body['creator_id'] = get_jwt_identity()
 
     item_schema.load(body)
 
     if Category.find_by_id(body['category_id']) is None:
         raise NotFound('Category with this id doesn\'t exist.')
 
+    if Item.query.filter_by(title=body['title']).first():
+        raise DuplicatedEntity()
+
     item = Item(**body)
     item.save()
 
     return {
-        'message': 'Create item successfully.',
         'id': item.id
     }
 
 
 @item_api.route('/<int:_id>', methods=['PUT'])
-@jwt_required()
+@jwt_required
 def put(_id):
     """
     PUT method for Item
@@ -114,7 +110,8 @@ def put(_id):
     :return: id of the newly created item
     """
     body = request.get_json()
-    body['user_id'] = current_identity.id
+    body['creator_id'] = get_jwt_identity()
+    print(get_jwt_identity())
     category_id = body.get('category_id', None)
     if category_id and Category.find_by_id(category_id) is None:
         raise NotFound('Category with this id doesn\'t exist.')
@@ -127,7 +124,7 @@ def put(_id):
     else:
         ItemSchema(partial=True).load(body)
 
-        if item.user_id != current_identity.id:
+        if item.creator_id != get_jwt_identity():
             abort(403)
         item.title = body.get('title', item.title)
         item.description = body.get('description', item.description)
@@ -136,13 +133,12 @@ def put(_id):
     item.save()
 
     return {
-        'message': 'Update item successfully.',
         'id': item.id
     }
 
 
 @item_api.route('/<int:_id>', methods=['DELETE'])
-@jwt_required()
+@jwt_required
 def delete(_id):
     """
     DELETE method for Item
@@ -157,10 +153,8 @@ def delete(_id):
     if item is None:
         raise NotFound(message='Item with this id doesn\'t exists.')
     else:
-        if item.user_id != current_identity.id:
+        if item.creator_id != get_jwt_identity():
             abort(403)
         item.delete()
 
-    return {
-               'message': 'Delete item successfully.',
-           }, 204
+    return {}, 204

@@ -31,5 +31,26 @@ class NotFound(MyBaseException):
     Not Found Exception
     - Will be raised when user try to access a entity does not exist in the database
     """
+
     def __init__(self, message='Can not find the specified entity.'):
         super().__init__(message, status_code=404)
+
+
+class FalseAuthentication(MyBaseException):
+    """
+    False Authentication Exception
+    - Will be raised when user login with wrong value like password,...
+    """
+
+    def __init__(self, message='Wrong password.'):
+        super().__init__(message, status_code=400)
+
+
+class DuplicatedEntity(MyBaseException):
+    """
+    Duplicated Entity Exception
+    - Will be raised when user try to create a new entity that violates unique property
+    """
+
+    def __init__(self, message='This entity has already existed.'):
+        super().__init__(message, status_code=400)

@@ -1,5 +1,6 @@
-from db import db
-from common.mixins.basemodelmixin import ModelMixin
+from main.db import db
+
+from models.mixins.basemodelmixin import ModelMixin
 
 
 class Item(ModelMixin, db.Model):
@@ -10,4 +11,4 @@ class Item(ModelMixin, db.Model):
     description = db.Column(db.String(256), nullable=False)
 
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

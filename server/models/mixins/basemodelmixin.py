@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from db import db
+from main.db import db
 
 
 class ModelMixin:

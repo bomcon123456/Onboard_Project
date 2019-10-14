@@ -2,12 +2,12 @@ from flask import Blueprint, jsonify
 from marshmallow import ValidationError
 from sqlalchemy import exc
 
-from common.customexceptions import NotFound
+from utils.customexceptions import MyBaseException
 
 error_handlers = Blueprint('error_handlers', __name__)
 
 
-@error_handlers.app_errorhandler(NotFound)
+@error_handlers.app_errorhandler(MyBaseException)
 def handle_not_found(error):
     return error.to_response()
 
@@ -37,10 +37,14 @@ def handle_database_error(error):
     error_info = error.orig.args
 
     response = jsonify({
-        'error': 'Try to create a new entity that has already existed.',
+        'error': 'Internal Error',
         'description': error_info[1]
     })
     if error_info[0] == 1062:
+        response = jsonify({
+            'error': 'Try to create a new entity that has already existed.',
+            'description': error_info[1]
+        })
         response.status_code = 400
     else:
         response.status_code = 500

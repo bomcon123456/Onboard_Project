@@ -1,23 +1,21 @@
 from passlib.hash import bcrypt
 
-from db import db
-from common.mixins.basemodelmixin import ModelMixin
+from main.db import db
+from models.mixins.basemodelmixin import ModelMixin
 
 
 class User(ModelMixin, db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    name = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(80), unique=True, nullable=False)
     hashed_password = db.Column(db.String(80), nullable=False)
     items = db.relationship('Item', backref="seller", lazy='dynamic')
 
     def __init__(self, **kwargs):
         """
         Customized constructor of User Model for hashing password
-        :param kwargs['username']: username of the User
-        :param kwargs['name']: name of the User
+        :param kwargs['email']: email of the User
         :param kwargs['password']: prehash-password of the User
         """
         prehash_password = kwargs['password']
