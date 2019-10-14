@@ -20,6 +20,7 @@ APP_SECRET_KEY='SOME_KEY'
 - PyMySQL
 - MySQLdb
 - mysql-connector-python
+Don't know what to choose? Read this awesome answer from Collin: https://stackoverflow.com/a/25724855
 - Then remember to update the DATABASE_URL to tell which connector you are using:
 'mysql+connector://...'
 5. Since Flask-SQLAlchemy can't automatically create a new database, you should create it by yourself.
