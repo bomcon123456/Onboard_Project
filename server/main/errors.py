@@ -40,20 +40,13 @@ def handle_database_error(error):
         'error': 'Internal Error',
         'description': error_info[1]
     })
-    if error_info[0] == 1062:
-        response = jsonify({
-            'error': 'Try to create a new entity that has already existed.',
-            'description': error_info[1]
-        })
-        response.status_code = 400
-    else:
-        response.status_code = 500
-    return response
+    return response, 500
 
-# @error_handlers.app_errorhandler(Exception)
-# def handle_all_errors(error):
-#     response = jsonify({
-#         'error': '[ERROR]: Internal Server Error.'
-#     })
-#     response.status_code = 500
-#     return response
+
+@error_handlers.app_errorhandler(Exception)
+def handle_all_errors(error):
+    response = jsonify({
+        'error': '[ERROR]: Internal Server Error.'
+    })
+    response.status_code = 500
+    return response
