@@ -1,8 +1,8 @@
 from flask import Blueprint, request
 from flask_jwt import jwt_required, current_identity
 
-from .model import User
-from .schema import UserRegisterSchema, UserSchema
+from models.user import User
+from schemas.user import UserRegisterSchema, UserSchema
 
 user_api = Blueprint('users', __name__)
 

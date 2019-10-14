@@ -2,9 +2,9 @@ from flask import Blueprint, request, abort
 from flask_jwt import jwt_required, current_identity
 
 from common.customexceptions import NotFound
-from .model import Item
-from .schema import ItemSchema
-from ..categories.model import Category
+from models.item import Item
+from schemas.item import ItemSchema
+from models.category import Category
 
 item_api = Blueprint('item', __name__)
 

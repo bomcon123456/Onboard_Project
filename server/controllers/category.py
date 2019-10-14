@@ -1,8 +1,8 @@
 from flask import Blueprint, request
 
 from common.customexceptions import NotFound
-from .model import Category
-from .schema import CategorySchema
+from models.category import Category
+from schemas.category import CategorySchema
 
 category_api = Blueprint('category', __name__)
 

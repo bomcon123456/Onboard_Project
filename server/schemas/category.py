@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, validate
 
-from ..items.schema import ItemSchema
+from schemas.item import ItemSchema
 
 
 class CategorySchema(Schema):
