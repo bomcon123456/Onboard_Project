@@ -74,7 +74,7 @@ def get_one(_id):
 
     category = Category.find_by_id(_id)
     if category is None:
-        raise NotFound(message='Category with this id doesn\'t exist.')
+        raise NotFound(description='Category with this id doesn\'t exist.')
     else:
         return {
             'data': category_schema.dump(category)
@@ -99,7 +99,7 @@ def post():
     category_schema.load(body)
 
     if Category.query.filter_by(title=body['title']).first():
-        raise DuplicatedEntity()
+        raise DuplicatedEntity(description='Category with this id has already existed.')
 
     category = Category(**body)
     category.save()
@@ -159,7 +159,7 @@ def delete(_id):
     """
     category = Category.find_by_id(_id)
     if category is None:
-        raise NotFound(message='Category with this id doesn\'t exist.')
+        raise NotFound(description='Category with this id has already existed.')
     else:
         print('wtf')
         db.session.query(Item).filter(Item.category_id == _id).delete()

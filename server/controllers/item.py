@@ -47,7 +47,7 @@ def get_one(_id):
     """
     item = Item.find_by_id(_id)
     if item is None:
-        raise NotFound(message='Item with this id doesn\'t exists.')
+        raise NotFound(description='Item with this id doesn\'t exist.')
     else:
         return {
             'data': item_schema.dump(item)
@@ -78,10 +78,10 @@ def post():
     item_schema.load(body)
 
     if Category.find_by_id(body['category_id']) is None:
-        raise NotFound('Category with this id doesn\'t exist.')
+        raise NotFound(description='Category with this id doesn\'t exist.')
 
     if Item.query.filter_by(title=body['title']).first():
-        raise DuplicatedEntity()
+        raise DuplicatedEntity(description='Item with this id exists.')
 
     item = Item(**body)
     item.save()
@@ -114,7 +114,7 @@ def put(_id):
     print(get_jwt_identity())
     category_id = body.get('category_id', None)
     if category_id and Category.find_by_id(category_id) is None:
-        raise NotFound('Category with this id doesn\'t exist.')
+        raise NotFound(description='Category with this id doesn\'t exist.')
 
     item = Item.find_by_id(_id)
     if item is None:
@@ -151,7 +151,7 @@ def delete(_id):
     """
     item = Item.find_by_id(_id)
     if item is None:
-        raise NotFound(message='Item with this id doesn\'t exists.')
+        raise NotFound(description='Item with this id doesn\'t exist.')
     else:
         if item.creator_id != get_jwt_identity():
             abort(403)

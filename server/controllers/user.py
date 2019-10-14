@@ -25,7 +25,7 @@ def get_user(_id):
 
     user = User.find_by_id(_id)
     if not user:
-        raise NotFound('Can\'t find user with this id.')
+        raise NotFound(description='User with this id doesn\'t exist.')
 
     result = UserSchema().dump(user)
     return {
@@ -50,7 +50,7 @@ def register():
     UserRegisterSchema().load(data)
 
     if User.query.filter_by(email=data['email']).first():
-        raise DuplicatedEntity()
+        raise DuplicatedEntity(description='User with this email exists.')
 
     user = User(**data)
     user.save()
