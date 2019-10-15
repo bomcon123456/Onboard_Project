@@ -21,7 +21,7 @@ def get():
     :queryparam page: page that client wants to get, default = 1
     :queryparam size: item per page that client wants to get, default = 5
 
-    :return: List of categories, currentPage, perPage, total.
+    :return: List of categories, current_page, per_page, total.
     """
     page = request.args.get('page', 1)
     size = request.args.get('size', 5)
@@ -31,8 +31,8 @@ def get():
     result = categories_schema.dump(paginator.items)
     return {
         'data': result,
-        'currentPage': paginator.page,
-        'perPage': paginator.per_page,
+        'current_page': paginator.page,
+        'per_page': paginator.per_page,
         'total': paginator.total
     }
 
