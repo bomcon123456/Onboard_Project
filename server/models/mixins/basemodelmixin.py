@@ -7,13 +7,13 @@ class ModelMixin:
     """
     Base Model Mixin
     - Provide CRUD operation
-    - Add timestamps (created_at, updated_at)
+    - Add timestamps (created, updated)
     - Usage: Class AModel(ModelMixin, db.Model)
     """
     __table_args__ = {'extend_existing': True}
 
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    created = db.Column(db.DateTime, default=datetime.now)
+    updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     @classmethod
     def find_by_id(cls, _id):

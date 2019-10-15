@@ -14,14 +14,14 @@ auth_api = Blueprint('auth', __name__)
 def login():
     data = request.get_json()
 
-    username = data.get('username', None)
+    email = data.get('email', None)
     password = data.get('password', None)
 
     UserRegisterSchema().load(data)
 
-    user = User.query.filter_by(username=username).first()
+    user = User.query.filter_by(email=email).first()
     if not user:
-        raise NotFound('Can\'t find user with that username.')
+        raise NotFound('Can\'t find user with that email.')
     if bcrypt.verify(password, user.hashed_password):
         access_token = create_access_token(identity=user.id)
         return {'access_token': access_token, 'id': user.id}

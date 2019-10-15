@@ -7,6 +7,8 @@ class ItemSchema(Schema):
     description = fields.String(validate=validate.Length(min=4, max=256), required=True)
     category_id = fields.Integer(required=True)
     creator_id = fields.Integer(required=True)
+    created = fields.DateTime(dump_only=True)
+    updated = fields.DateTime(dump_only=True)
 
     class Meta:
         strict = True
