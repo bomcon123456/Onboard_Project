@@ -68,7 +68,6 @@ def post():
     :raise: ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: If try to create an existed object.
     :raise Unauthorized 401: If not login
-    :raise Forbidden 403: If user tries to delete other user's items
     :raise NotFound 404: If category_id is not valid
     :return: id of the newly created item
     """
@@ -111,7 +110,7 @@ def put(_id):
     """
     body = request.get_json()
     body['creator_id'] = get_jwt_identity()
-    print(get_jwt_identity())
+
     category_id = body.get('category_id', None)
     if category_id and Category.find_by_id(category_id) is None:
         raise NotFound(description='Category with this id doesn\'t exist.')

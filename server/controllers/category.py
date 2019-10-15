@@ -46,10 +46,14 @@ def get_item_by_category(_id):
     :queryparam page: page that client wants to get, default = 1
     :queryparam size: item per page that client wants to get, default = 5
 
+    :raise Not Found 404: If category with that id doesn't exist
     :return: List of items, current_page, per_page, total.
     """
     page = request.args.get('page', 1)
     size = request.args.get('size', 5)
+
+    if Category.query.filter_by(id=_id).first() is None:
+        raise NotFound('Category with this id doesn\'t exist.')
 
     paginator = Item.query.filter_by(category_id=_id).paginate(page, size, False)
     result = categories_schema.dump(paginator.items)
@@ -161,7 +165,6 @@ def delete(_id):
     if category is None:
         raise NotFound(description='Category with this id has already existed.')
     else:
-        print('wtf')
         db.session.query(Item).filter(Item.category_id == _id).delete()
         category.delete(commit=False)
         db.session.commit()
