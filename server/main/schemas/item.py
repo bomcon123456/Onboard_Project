@@ -8,7 +8,7 @@ class ItemSchema(Schema):
     title = fields.String(validate=validate.Length(min=4, max=30), required=True)
     description = fields.String(validate=validate.Length(min=4, max=256), required=True)
     category_id = fields.Integer(required=True, load_only=True)
-    category = fields.Nested(CategorySchema(only=('id', 'title')))
+    category = fields.Nested(CategorySchema(only=('id', 'title')), dump_only=True)
     creator_id = fields.Integer(required=True)
     created = fields.DateTime(dump_only=True)
     updated = fields.DateTime(dump_only=True)
