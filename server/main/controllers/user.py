@@ -1,9 +1,9 @@
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 
-from models.user import User
-from schemas.user import UserRegisterSchema, UserSchema
-from utils.customexceptions import NotFound, DuplicatedEntity
+from main.models.user import User
+from main.schemas.user import UserRegisterSchema, UserSchema
+from main.utils.customexceptions import NotFound, DuplicatedEntity
 
 user_api = Blueprint('users', __name__)
 
@@ -16,6 +16,7 @@ def get_user(_id):
     :requires: Login-ed user
 
     :raise Unauthorized 401: If user is not login-ed
+    :raise Forbidden 403: If user tries to see other user's profile
     :raise NotFound 404: If user doesn't exist.
     :return: Information of login-ed user
     """
@@ -43,7 +44,6 @@ def register():
 
     :raise ValidationError 400: If body of request is messed up
     :raise DuplicatedEntity 400: If try to create an existed object.
-    :raise IntegrityError1062 400: If try to create an existed user
     :return: access_token and id of the newly created user
     """
     data = request.get_json()

@@ -1,10 +1,10 @@
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from utils.customexceptions import NotFound, DuplicatedEntity
-from models.item import Item
-from schemas.item import ItemSchema
-from models.category import Category
+from main.utils.customexceptions import NotFound, DuplicatedEntity
+from main.models.item import Item
+from main.schemas.item import ItemSchema
+from main.models.category import Category
 
 item_api = Blueprint('item', __name__)
 
@@ -102,10 +102,10 @@ def put(_id):
     :bodyparam title: Title of the item
     :bodyparam description: Description of the item
 
-    :raise: ValidationError if form is messed up
+    :raise ValidationError 400: if form is messed up
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
-    :raise NotFound 404: If category_id is not valid
+    :raise NotFound 404: If category_id is not valid or item with id is not valid
     :return: id of the newly created item
     """
     body = request.get_json()
@@ -117,9 +117,7 @@ def put(_id):
 
     item = Item.find_by_id(_id)
     if item is None:
-        item_schema.load(body)
-
-        item = Item(**body)
+        raise NotFound(description='Item with this id doesn\'t exist.')
     else:
         ItemSchema(partial=True).load(body)
 
@@ -143,9 +141,9 @@ def delete(_id):
     DELETE method for Item
     :param _id: ID of the item we want to delete
 
-    :raise Not Found 404: If item with that id doesn't exist
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
+    :raise Not Found 404: If item with that id doesn't exist
     :return: 204 response
     """
     item = Item.find_by_id(_id)

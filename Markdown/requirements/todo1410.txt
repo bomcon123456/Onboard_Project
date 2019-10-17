@@ -1,0 +1,29 @@
+.1. entity relationship:
+  ID: ghi ca type, auto increment?
+  user_id of the item: changed to creator_id
+.2. User manipulate category, all items belongs to a deleted category will be deleted also.
+.3.created_at -> created
+.4. consider name: delete or change to fullname (first + last)
+.5. hash-pas length should == encryption length
+.6. username -> email
+.7. consider remove modules folder, flat
+.8. Change folder architecture:
+Models: ...
+Controllers: ...
+Schemas: ...
+Libs/ Utils: other common thing 
+Main: core logics like errors, security,app
+let only run.py outside
+-9. Can create a schema for error response by creating an Error class hierachy
+.10. Error like duplicate key should be raise by ourself
+.11. errorhandlers -> errors, we will define Error class here also.
+.12. remove /api/v1
+.13. Register: return a token so that we dont have to login again
+.14. Change endpoint for get authen user -> /users/id
+.15. login return id
+.16. seller -> creator
+.17. return created, updated
+.18. response underscore variable, remove message for CRUD response
+.19. Remove items for GET category
+.20. Every response should have params, query (type, description) in another API docs
+get item for cat -> /categories/{id}/items

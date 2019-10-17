@@ -41,12 +41,4 @@ You can see endpoints and its request/response example here:
 ### Project folder structure:
 ![Folder-Structure](../Markdown/ServerStructure2.png)
 
-For each resource in modules folder, it usually contains:
-- **init.py**: declare this resource folder is a package
-- **model.py**: declare how this resource is represented in the database
-- **controller.py**: declare routes and its function for each route (Blueprint)
-- **schema.py**: declare Marshmallow schema for serialize and validate
-
-
-
 

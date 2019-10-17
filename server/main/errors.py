@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from marshmallow import ValidationError
 from sqlalchemy import exc
 
-from utils.customexceptions import MyBaseException
+from main.utils.customexceptions import MyBaseException
 
 error_handlers = Blueprint('error_handlers', __name__)
 

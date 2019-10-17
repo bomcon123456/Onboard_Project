@@ -5,10 +5,10 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 
 from main.errors import error_handlers
-from controllers.category import category_api
-from controllers.item import item_api
-from controllers.user import user_api
-from controllers.auth import auth_api
+from main.controllers.category import category_api
+from main.controllers.item import item_api
+from main.controllers.user import user_api
+from main.controllers.auth import auth_api
 
 app = Flask(__name__)
 load_dotenv()

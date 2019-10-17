@@ -1,11 +1,11 @@
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from utils.customexceptions import NotFound, DuplicatedEntity
-from models.item import Item
-from models.category import Category
+from main.utils.customexceptions import NotFound, DuplicatedEntity
+from main.models.item import Item
+from main.models.category import Category
 from main.db import db
-from schemas.category import CategorySchema
+from main.schemas.category import CategorySchema
 
 category_api = Blueprint('category', __name__)
 
@@ -95,6 +95,7 @@ def post():
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: If try to create an existed object.
+    :raise Unauthorized 401: If user is not login-ed
     :return: id of the newly created category
     """
     body = request.get_json()
@@ -123,7 +124,9 @@ def put(_id):
     :bodyparam description: Description of the category
 
     :raise ValidationError 400: if form is messed up
+    :raise Unauthorized 401: If user is not login-ed
     :raise Forbidden 403: if user try to update other user's category
+    :raise Not Found 404: If category with that id doesn't exist
     :return: id of the newly created category
     """
     body = request.get_json()
@@ -132,10 +135,7 @@ def put(_id):
 
     category = Category.find_by_id(_id)
     if category is None:
-        body['creator_id'] = creator_id
-        category_schema.load(body)
-
-        category = Category(**body)
+        raise NotFound(description='Category with this id doesn\'t exist.')
     else:
         if creator_id != category.creator_id:
             abort(403)
@@ -158,13 +158,19 @@ def delete(_id):
     DELETE method for Category
     :param _id: ID of the category we want to delete
 
+    :raise Unauthorized 401: If user is not login-ed
+    :raise Forbidden 403: if user try to update other user's category
     :raise Not Found 404: If category with that id doesn't exist
     :return: 204 response
     """
     category = Category.find_by_id(_id)
+
     if category is None:
         raise NotFound(description='Category with this id has already existed.')
     else:
+        creator_id = get_jwt_identity()
+        if creator_id != category.creator_id:
+            abort(403)
         db.session.query(Item).filter(Item.category_id == _id).delete()
         category.delete(commit=False)
         db.session.commit()

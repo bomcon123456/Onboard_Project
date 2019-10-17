@@ -1,7 +1,7 @@
 from passlib.hash import bcrypt
 
 from main.db import db
-from models.mixins.basemodelmixin import ModelMixin
+from main.models.mixins.basemodelmixin import ModelMixin
 
 
 class User(ModelMixin, db.Model):
