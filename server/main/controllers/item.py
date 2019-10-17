@@ -103,6 +103,7 @@ def put(_id):
     :bodyparam description: Description of the item
 
     :raise ValidationError 400: if form is messed up
+    :raise DuplicatedEntity 400: if there is a item with the title.
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
     :raise NotFound 404: If category_id is not valid or item with id is not valid
@@ -120,6 +121,8 @@ def put(_id):
         raise NotFound(description='Item with this id doesn\'t exist.')
     else:
         ItemSchema(partial=True).load(body)
+        if Item.query.filter_by(title=body['title']):
+            raise DuplicatedEntity(description='Item with this title has already existed.')
 
         if item.creator_id != get_jwt_identity():
             abort(403)

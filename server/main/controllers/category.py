@@ -124,6 +124,7 @@ def put(_id):
     :bodyparam description: Description of the category
 
     :raise ValidationError 400: if form is messed up
+    :raise DuplicatedEntity 400: if there is a category with the title.
     :raise Unauthorized 401: If user is not login-ed
     :raise Forbidden 403: if user try to update other user's category
     :raise Not Found 404: If category with that id doesn't exist
@@ -140,6 +141,9 @@ def put(_id):
         if creator_id != category.creator_id:
             abort(403)
         CategorySchema(partial=True).load(body)
+
+        if Category.query.filter_by(titlle=body['title']):
+            raise DuplicatedEntity(description='There is already a category with this title.')
 
         category.title = body.get('title', category.title)
         category.description = body.get('description', category.description)
