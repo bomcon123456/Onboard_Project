@@ -1,11 +1,12 @@
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from main.utils.customexceptions import NotFound, DuplicatedEntity
+from main.errors import NotFound, DuplicatedEntity, FalseArguments
+from main.db import db
 from main.models.item import Item
 from main.models.category import Category
-from main.db import db
 from main.schemas.category import CategorySchema
+from main.schemas.item import ItemSchema
 
 category_api = Blueprint('category', __name__)
 
@@ -21,19 +22,23 @@ def get():
     :queryparam page: page that client wants to get, default = 1
     :queryparam size: item per page that client wants to get, default = 5
 
+    :raise FalseArguments: When client passes invalid value for page, per_page
     :return: List of categories, current_page, per_page, total.
     """
     page = request.args.get('page', 1)
-    size = request.args.get('size', 5)
+    per_page = request.args.get('per_page', 5)
 
-    paginator = Category.query.paginate(page, size, False)
+    if page < 0 or per_page < 0:
+        raise FalseArguments(error_message='Please insert a positive number for page/per_page')
+
+    paginator = Category.query.paginate(page, per_page, False)
 
     result = categories_schema.dump(paginator.items)
     return {
         'data': result,
-        'current_page': paginator.page,
+        'page': paginator.page,
         'per_page': paginator.per_page,
-        'total': paginator.total
+        'total_items': paginator.total
     }
 
 
@@ -47,22 +52,26 @@ def get_item_by_category(_id):
     :queryparam size: item per page that client wants to get, default = 5
 
     :raise Not Found 404: If category with that id doesn't exist
+    :raise FalseArguments: When client passes invalid value for page, per_page
     :return: List of items, current_page, per_page, total.
     """
     page = request.args.get('page', 1)
-    size = request.args.get('size', 5)
+    per_page = request.args.get('per_page', 5)
+
+    if page < 0 or per_page < 0:
+        raise FalseArguments(error_message='Please insert a positive number for page/per_page')
 
     if Category.query.filter_by(id=_id).first() is None:
         raise NotFound('Category with this id doesn\'t exist.')
 
-    paginator = Item.query.filter_by(category_id=_id).paginate(page, size, False)
-    result = categories_schema.dump(paginator.items)
+    paginator = Item.query.filter_by(category_id=_id).paginate(page, per_page, False)
+    result = ItemSchema(many=True, exclude=['category']).dump(paginator.items)
 
     return {
         'data': result,
-        'current_page': paginator.page,
+        'page': paginator.page,
         'per_page': paginator.per_page,
-        'total': paginator.total
+        'total_items': paginator.total
     }
 
 
@@ -78,7 +87,7 @@ def get_one(_id):
 
     category = Category.find_by_id(_id)
     if category is None:
-        raise NotFound(description='Category with this id doesn\'t exist.')
+        raise NotFound(error_message='Category with this id doesn\'t exist.')
     else:
         return {
             'data': category_schema.dump(category)
@@ -91,7 +100,7 @@ def post():
     """
     POST method for Category
     :bodyparam title: Title of the category
-    :bodyparam description: Description of the category
+    :bodyparam error_message: Description of the category
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: If try to create an existed object.
@@ -104,13 +113,13 @@ def post():
     category_schema.load(body)
 
     if Category.query.filter_by(title=body['title']).first():
-        raise DuplicatedEntity(description='Category with this id has already existed.')
+        raise DuplicatedEntity(error_message='Category with this id has already existed.')
 
     category = Category(**body)
     category.save()
 
     return {
-        'id': category.id
+        'data': category_schema.dump(category)
     }
 
 
@@ -121,7 +130,7 @@ def put(_id):
     PUT method for Category
     :param _id: ID of the category we want to update
     :bodyparam title: Title of the category
-    :bodyparam description: Description of the category
+    :bodyparam error_message: Description of the category
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: if there is a category with the title.
@@ -136,22 +145,22 @@ def put(_id):
 
     category = Category.find_by_id(_id)
     if category is None:
-        raise NotFound(description='Category with this id doesn\'t exist.')
+        raise NotFound(error_message='Category with this id doesn\'t exist.')
     else:
         if creator_id != category.creator_id:
             abort(403)
         CategorySchema(partial=True).load(body)
 
-        if Category.query.filter_by(titlle=body['title']):
-            raise DuplicatedEntity(description='There is already a category with this title.')
+        if Category.query.filter_by(title=body['title']).first():
+            raise DuplicatedEntity(error_message='There is already a category with this title.')
 
         category.title = body.get('title', category.title)
-        category.description = body.get('description', category.description)
+        category.description = body.get('error_message', category.description)
 
     category.save()
 
     return {
-        'id': category.id
+        'data': category_schema.dump(category)
     }
 
 
@@ -170,7 +179,7 @@ def delete(_id):
     category = Category.find_by_id(_id)
 
     if category is None:
-        raise NotFound(description='Category with this id has already existed.')
+        raise NotFound(error_message='Category with this id has already existed.')
     else:
         creator_id = get_jwt_identity()
         if creator_id != category.creator_id:

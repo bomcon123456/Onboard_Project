@@ -1,10 +1,10 @@
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from main.utils.customexceptions import NotFound, DuplicatedEntity
+from main.errors import NotFound, DuplicatedEntity, FalseArguments
 from main.models.item import Item
-from main.schemas.item import ItemSchema
 from main.models.category import Category
+from main.schemas.item import ItemSchema
 
 item_api = Blueprint('item', __name__)
 
@@ -19,20 +19,30 @@ def get():
 
     :queryparam page: page that client wants to get, default = 1
     :queryparam size: item per page that client wants to get, default = 5
+    :queryparam category_id: category to which the client wants to get the items belong
 
+    :raise FalseArguments: When client passes invalid value for page, per_page
     :return: List of items, current_page, per_page, total.
     """
     page = request.args.get('page', 1)
-    size = request.args.get('size', 5)
+    per_page = request.args.get('per_page', 5)
+    category_id = request.args.get('category_id', None)
 
-    paginator = Item.query.paginate(page, size, False)
+    query = {}
+    if category_id is not None:
+        query['category_id'] = category_id
+
+    if page < 0 or per_page < 0:
+        raise FalseArguments(error_message='Please insert a positive number for page/per_page')
+
+    paginator = Item.query.filter_by(**query).paginate(page, per_page, False)
     result = categories_schema.dump(paginator.items)
 
     return {
         'data': result,
-        'current_page': paginator.page,
+        'page': paginator.page,
         'per_page': paginator.per_page,
-        'total': paginator.total
+        'total_items': paginator.total
     }
 
 
@@ -47,7 +57,7 @@ def get_one(_id):
     """
     item = Item.find_by_id(_id)
     if item is None:
-        raise NotFound(description='Item with this id doesn\'t exist.')
+        raise NotFound(error_message='Item with this id doesn\'t exist.')
     else:
         return {
             'data': item_schema.dump(item)
@@ -62,7 +72,7 @@ def post():
     :requires: must be login-ed
 
     :bodyparam title: Title of the item
-    :bodyparam description: Description of the item
+    :bodyparam error_message: Description of the item
     :bodypram category_id: Category of the item
 
     :raise: ValidationError 400: if form is messed up
@@ -77,16 +87,16 @@ def post():
     item_schema.load(body)
 
     if Category.find_by_id(body['category_id']) is None:
-        raise NotFound(description='Category with this id doesn\'t exist.')
+        raise NotFound(error_message='Category with this id doesn\'t exist.')
 
     if Item.query.filter_by(title=body['title']).first():
-        raise DuplicatedEntity(description='Item with this id exists.')
+        raise DuplicatedEntity(error_message='Item with this id exists.')
 
     item = Item(**body)
     item.save()
 
     return {
-        'id': item.id
+        'data': item_schema.dump(item)
     }
 
 
@@ -100,7 +110,7 @@ def put(_id):
     :param _id: ID of the item we want to update
 
     :bodyparam title: Title of the item
-    :bodyparam description: Description of the item
+    :bodyparam error_message: Description of the item
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: if there is a item with the title.
@@ -114,26 +124,26 @@ def put(_id):
 
     category_id = body.get('category_id', None)
     if category_id and Category.find_by_id(category_id) is None:
-        raise NotFound(description='Category with this id doesn\'t exist.')
+        raise NotFound(error_message='Category with this id doesn\'t exist.')
 
     item = Item.find_by_id(_id)
     if item is None:
-        raise NotFound(description='Item with this id doesn\'t exist.')
+        raise NotFound(error_message='Item with this id doesn\'t exist.')
     else:
         ItemSchema(partial=True).load(body)
-        if Item.query.filter_by(title=body['title']):
-            raise DuplicatedEntity(description='Item with this title has already existed.')
+        if Item.query.filter_by(title=body['title']).first():
+            raise DuplicatedEntity(error_message='Item with this title has already existed.')
 
         if item.creator_id != get_jwt_identity():
             abort(403)
         item.title = body.get('title', item.title)
-        item.description = body.get('description', item.description)
+        item.description = body.get('error_message', item.description)
         item.category_id = category_id or item.category_id
 
     item.save()
 
     return {
-        'id': item.id
+        'data': item_schema.dump(item)
     }
 
 
@@ -151,7 +161,7 @@ def delete(_id):
     """
     item = Item.find_by_id(_id)
     if item is None:
-        raise NotFound(description='Item with this id doesn\'t exist.')
+        raise NotFound(error_message='Item with this id doesn\'t exist.')
     else:
         if item.creator_id != get_jwt_identity():
             abort(403)

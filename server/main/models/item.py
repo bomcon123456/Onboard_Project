@@ -1,6 +1,6 @@
 from main.db import db
 
-from main.models.mixins.basemodelmixin import ModelMixin
+from main.models.mixins.basemodel import ModelMixin
 
 
 class Item(ModelMixin, db.Model):

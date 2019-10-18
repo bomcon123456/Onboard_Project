@@ -1,4 +1,4 @@
-from main.models.mixins.basemodelmixin import ModelMixin
+from main.models.mixins.basemodel import ModelMixin
 from main.db import db
 
 

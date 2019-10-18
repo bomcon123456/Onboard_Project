@@ -1,11 +1,10 @@
 from flask import Blueprint, request
 from flask_jwt_extended import create_access_token
-
 from passlib.hash import bcrypt
 
 from main.models.user import User
 from main.schemas.user import UserRegisterSchema
-from main.utils.customexceptions import NotFound, FalseAuthentication
+from main.errors import NotFound, FalseAuthentication
 
 auth_api = Blueprint('auth', __name__)
 
