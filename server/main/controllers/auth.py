@@ -17,7 +17,7 @@ def login():
     :bodyparam password: password of the user
 
     :raise ValidationError 400: If body of request is messed up
-    :raise Not Found 404: If try to login with a unregistered email.
+    :raise FalseAuthentication 400: If try to login with a invalid email, password.
     :return: access_token and id of the newly created user
     """
     data = request.get_json()
@@ -29,9 +29,9 @@ def login():
 
     user = User.query.filter_by(email=email).first()
     if not user:
-        raise NotFound('Can\'t find user with that email.')
+        raise FalseAuthentication('Cant login with the provided information.')
     if bcrypt.verify(password, user.hashed_password):
         access_token = create_access_token(identity=user.id)
         return {'access_token': access_token, 'id': user.id}
     else:
-        raise FalseAuthentication('Please enter valid password.')
+        raise FalseAuthentication('Cant login with the provided information.')
