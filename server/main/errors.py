@@ -112,10 +112,10 @@ def handle_database_error(error):
     return response, 500
 
 
-# @error_handlers.app_errorhandler(Exception)
-# def handle_all_errors(error):
-#     response = jsonify({
-#         'error': '500_001'
-#     })
-#     response.status_code = 500
-#     return response
+@error_handlers.app_errorhandler(Exception)
+def handle_all_errors(error):
+    response = jsonify({
+        'error': '500_001'
+    })
+    response.status_code = 500
+    return response

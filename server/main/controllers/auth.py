@@ -4,7 +4,7 @@ from passlib.hash import bcrypt
 
 from main.models.user import User
 from main.schemas.user import UserRegisterSchema
-from main.errors import NotFound, FalseAuthentication
+from main.errors import FalseAuthentication
 
 auth_api = Blueprint('auth', __name__)
 

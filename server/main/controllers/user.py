@@ -1,37 +1,11 @@
-from flask import Blueprint, request, abort
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
+from flask import Blueprint, request
+from flask_jwt_extended import create_access_token
 
 from main.models.user import User
-from main.schemas.user import UserRegisterSchema, UserSchema
-from main.errors import NotFound, DuplicatedEntity
+from main.schemas.user import UserRegisterSchema
+from main.errors import DuplicatedEntity
 
 user_api = Blueprint('users', __name__)
-
-
-@user_api.route('/<int:_id>', methods=['GET'])
-@jwt_required
-def get_user(_id):
-    """
-    GET authenticated user
-    :requires: Login-ed user
-
-    :raise Unauthorized 401: If user is not login-ed
-    :raise Forbidden 403: If user tries to see other user's profile
-    :raise NotFound 404: If user doesn't exist.
-    :return: Information of login-ed user
-    """
-    user_id = get_jwt_identity()
-    if user_id != _id:
-        abort(403)
-
-    user = User.find_by_id(_id)
-    if not user:
-        raise NotFound(error_message='User with this id doesn\'t exist.')
-
-    result = UserSchema().dump(user)
-    return {
-        'data': result
-    }
 
 
 @user_api.route('', methods=['POST'])

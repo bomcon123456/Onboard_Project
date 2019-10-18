@@ -6,7 +6,6 @@ from main.db import db
 from main.models.item import Item
 from main.models.category import Category
 from main.schemas.category import CategorySchema
-from main.schemas.item import ItemSchema
 
 category_api = Blueprint('category', __name__)
 
