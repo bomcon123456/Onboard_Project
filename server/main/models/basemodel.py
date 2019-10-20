@@ -10,6 +10,9 @@ class ModelMixin:
     - Add timestamps (created, updated)
     - Usage: Class AModel(ModelMixin, db.Model)
     """
+    # Add this so that if this table is already presented in the given MetaData, apply further arguments within the
+    # constructor to the existing table.
+    # MetaData: A collection of Table objects and their associated schema constructs.
     __table_args__ = {'extend_existing': True}
 
     created = db.Column(db.DateTime, default=datetime.now)

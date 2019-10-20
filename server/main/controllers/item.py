@@ -2,8 +2,8 @@ from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from main.errors import NotFound, DuplicatedEntity, FalseArguments
-from main.models.item import Item
 from main.models.category import Category
+from main.models.item import Item
 from main.schemas.item import ItemSchema
 
 item_api = Blueprint('item', __name__)
@@ -18,10 +18,10 @@ def get():
     GET method for Item
 
     :queryparam page: page that client wants to get, default = 1
-    :queryparam size: item per page that client wants to get, default = 5
+    :queryparam per_page: item per page that client wants to get, default = 5
     :queryparam category_id: category to which the client wants to get the items belong
 
-    :raise FalseArguments: When client passes invalid value for page, per_page
+    :raise FalseArguments 400: When client passes invalid value for page, per_page
     :return: List of items, current_page, per_page, total.
     """
     page = request.args.get('page', 1)
@@ -35,7 +35,7 @@ def get():
     if page < 0 or per_page < 0:
         raise FalseArguments(error_message='Please insert a positive number for page/per_page')
 
-    paginator = Item.query.filter_by(**query).paginate(page, per_page, False)
+    paginator = Item.query.filter_by(**query).paginate(page=page, per_page=per_page, error_out=False)
     result = categories_schema.dump(paginator.items)
 
     return {
@@ -72,7 +72,7 @@ def post():
     :requires: must be login-ed
 
     :bodyparam title: Title of the item
-    :bodyparam error_message: Description of the item
+    :bodyparam description: Description of the item
     :bodypram category_id: Category of the item
 
     :raise: ValidationError 400: if form is messed up
@@ -110,7 +110,7 @@ def put(_id):
     :param _id: ID of the item we want to update
 
     :bodyparam title: Title of the item
-    :bodyparam error_message: Description of the item
+    :bodyparam description: Description of the item
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: if there is a item with the title.
@@ -131,13 +131,15 @@ def put(_id):
         raise NotFound(error_message='Item with this id doesn\'t exist.')
     else:
         ItemSchema(partial=True).load(body)
-        if Item.query.filter_by(title=body['title']).first():
+
+        title = body.get('title', None)
+        if title and Item.query.filter_by(title=title).first():
             raise DuplicatedEntity(error_message='Item with this title has already existed.')
 
         if item.creator_id != get_jwt_identity():
             abort(403)
-        item.title = body.get('title', item.title)
-        item.description = body.get('error_message', item.description)
+        item.title = title or item.title
+        item.description = body.get('description', item.description)
         item.category_id = category_id or item.category_id
 
     item.save()

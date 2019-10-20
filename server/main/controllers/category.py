@@ -1,10 +1,10 @@
 from flask import Blueprint, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from main.errors import NotFound, DuplicatedEntity, FalseArguments
 from main.db import db
-from main.models.item import Item
+from main.errors import NotFound, DuplicatedEntity, FalseArguments
 from main.models.category import Category
+from main.models.item import Item
 from main.schemas.category import CategorySchema
 
 category_api = Blueprint('category', __name__)
@@ -19,9 +19,9 @@ def get():
     GET all method for Category
 
     :queryparam page: page that client wants to get, default = 1
-    :queryparam size: item per page that client wants to get, default = 5
+    :queryparam per_page: item per page that client wants to get, default = 5
 
-    :raise FalseArguments: When client passes invalid value for page, per_page
+    :raise FalseArguments 400: When client passes invalid value for page, per_page
     :return: List of categories, current_page, per_page, total.
     """
     page = request.args.get('page', 1)
@@ -30,7 +30,7 @@ def get():
     if page < 0 or per_page < 0:
         raise FalseArguments(error_message='Please insert a positive number for page/per_page')
 
-    paginator = Category.query.paginate(page, per_page, False)
+    paginator = Category.query.paginate(page=page, per_page=per_page, error_out=False)
 
     result = categories_schema.dump(paginator.items)
     return {
@@ -66,7 +66,7 @@ def post():
     """
     POST method for Category
     :bodyparam title: Title of the category
-    :bodyparam error_message: Description of the category
+    :bodyparam description: Description of the category
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: If try to create an existed object.
@@ -96,7 +96,7 @@ def put(_id):
     PUT method for Category
     :param _id: ID of the category we want to update
     :bodyparam title: Title of the category
-    :bodyparam error_message: Description of the category
+    :bodyparam description: Description of the category
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: if there is a category with the title.
@@ -117,11 +117,12 @@ def put(_id):
             abort(403)
         CategorySchema(partial=True).load(body)
 
-        if Category.query.filter_by(title=body['title']).first():
+        title = body.get('title', None)
+        if title and Category.query.filter_by(title=title).first():
             raise DuplicatedEntity(error_message='There is already a category with this title.')
 
-        category.title = body.get('title', category.title)
-        category.description = body.get('error_message', category.description)
+        category.title = title or category.title
+        category.description = body.get('description', category.description)
 
     category.save()
 
@@ -145,13 +146,12 @@ def delete(_id):
     category = Category.find_by_id(_id)
 
     if category is None:
-        raise NotFound(error_message='Category with this id has already existed.')
+        raise NotFound(error_message='Category with this id doesn\'t exist.')
     else:
         creator_id = get_jwt_identity()
         if creator_id != category.creator_id:
             abort(403)
         db.session.query(Item).filter(Item.category_id == _id).delete()
-        category.delete(commit=False)
-        db.session.commit()
+        category.delete()
 
     return {}, 204
