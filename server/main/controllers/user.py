@@ -21,6 +21,7 @@ def register():
     :return: access_token and id of the newly created user
     """
     data = request.get_json()
+
     UserRegisterSchema().load(data)
 
     email = data.get('email', None)

@@ -3,4 +3,5 @@ server/venv/
 **/__pycache__
 server/.idea
 server/.env
+server/.pytest_cache
 .DS_Store

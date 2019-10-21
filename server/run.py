@@ -1,5 +1,11 @@
+from dotenv import load_dotenv
+
 from main.db import db
-from main.app import app
+from main.app import create_app
+
+load_dotenv()
+
+app = create_app('default')
 
 db.init_app(app)
 

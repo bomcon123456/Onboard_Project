@@ -23,6 +23,6 @@ class User(ModelMixin, db.Model):
         del kwargs['password']
 
         # bcrypt will automatically generate a salt if not specified (recommended)
-        self.hashed_password = bcrypt.encrypt(prehash_password)
+        self.hashed_password = bcrypt.hash(prehash_password)
         kwargs['hashed_password'] = self.hashed_password
         super().__init__(**kwargs)
