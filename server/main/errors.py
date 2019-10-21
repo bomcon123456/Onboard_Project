@@ -33,23 +33,13 @@ class MyBaseException(Exception):
         return result, self.status_code
 
 
-class NotFound(MyBaseException):
+class DuplicatedEntity(MyBaseException):
     """
-    Not Found Exception
-    - Will be raised when user try to access a entity does not exist in the database
-    """
-
-    def __init__(self, error_message, error_code=404001):
-        super().__init__(error_message, error_code, status_code=404)
-
-
-class FalseAuthentication(MyBaseException):
-    """
-    False Authentication Exception
-    - Will be raised when user login with wrong value like password,...
+    Duplicated Entity Exception
+    - Will be raised when user try to create a new entity that violates unique property
     """
 
-    def __init__(self, error_message, error_code=400004):
+    def __init__(self, error_message, error_code=400002):
         super().__init__(error_message, error_code, status_code=400)
 
 
@@ -63,14 +53,24 @@ class FalseArguments(MyBaseException):
         super().__init__(error_message, error_code, status_code=400)
 
 
-class DuplicatedEntity(MyBaseException):
+class FalseAuthentication(MyBaseException):
     """
-    Duplicated Entity Exception
-    - Will be raised when user try to create a new entity that violates unique property
+    False Authentication Exception
+    - Will be raised when user login with wrong value like password,...
     """
 
-    def __init__(self, error_message, error_code=400002):
+    def __init__(self, error_message, error_code=400004):
         super().__init__(error_message, error_code, status_code=400)
+
+
+class NotFound(MyBaseException):
+    """
+    Not Found Exception
+    - Will be raised when user try to access an entity does not exist in the database
+    """
+
+    def __init__(self, error_message, error_code=404001):
+        super().__init__(error_message, error_code, status_code=404)
 
 
 error_handlers = Blueprint('error_handlers', __name__)

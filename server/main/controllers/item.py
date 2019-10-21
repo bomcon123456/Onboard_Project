@@ -9,7 +9,7 @@ from main.schemas.item import ItemSchema
 item_api = Blueprint('item', __name__)
 
 item_schema = ItemSchema()
-categories_schema = ItemSchema(many=True)
+items_schema = ItemSchema(many=True)
 
 
 @item_api.route('', methods=['GET'])
@@ -36,7 +36,7 @@ def get():
         raise FalseArguments(error_message='Please insert a positive number for page/per_page')
 
     paginator = Item.query.filter_by(**query).paginate(page=page, per_page=per_page, error_out=False)
-    result = categories_schema.dump(paginator.items)
+    result = items_schema.dump(paginator.items)
 
     return {
         'data': result,
