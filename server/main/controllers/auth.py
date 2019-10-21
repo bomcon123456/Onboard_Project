@@ -19,6 +19,7 @@ def login():
     :raise ValidationError 400: If body of request is messed up
     :return: access_token and id of the newly created user
     """
+
     data = request.get_json()
 
     email = data.get('email', None)
