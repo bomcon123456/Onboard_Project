@@ -5,6 +5,7 @@ from main.errors import NotFound, DuplicatedEntity, FalseArguments
 from main.models.category import Category
 from main.models.item import Item
 from main.schemas.item import ItemSchema
+from main.utils.type_conversions import pagination_params_conversion
 
 item_api = Blueprint('item', __name__)
 
@@ -24,18 +25,22 @@ def get():
     :raise FalseArguments 400: When client passes invalid value for page, per_page
     :return: List of items, current_page, per_page, total.
     """
+
     page = request.args.get('page', 1)
     per_page = request.args.get('per_page', 5)
     category_id = request.args.get('category_id', None)
+
+    pagination_params = pagination_params_conversion(page, per_page)
 
     query = {}
     if category_id is not None:
         query['category_id'] = category_id
 
-    if page < 0 or per_page < 0:
+    if pagination_params is None:
         raise FalseArguments(error_message='Please insert a positive number for page/per_page')
 
-    paginator = Item.query.filter_by(**query).paginate(page=page, per_page=per_page, error_out=False)
+    paginator = Item.query.filter_by(**query)\
+        .paginate(page=pagination_params[0], per_page=pagination_params[1], error_out=False)
     result = items_schema.dump(paginator.items)
 
     return {
@@ -79,8 +84,9 @@ def post():
     :raise DuplicatedEntity 400: If try to create an existed object.
     :raise Unauthorized 401: If not login
     :raise NotFound 404: If category_id is not valid
-    :return: id of the newly created item
+    :return: the created item
     """
+
     body = request.get_json()
     body['creator_id'] = get_jwt_identity()
 
@@ -117,7 +123,7 @@ def put(_id):
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
     :raise NotFound 404: If category_id is not valid or item with id is not valid
-    :return: id of the newly created item
+    :return: the updated item
     """
     body = request.get_json()
     body['creator_id'] = get_jwt_identity()

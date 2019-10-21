@@ -6,6 +6,7 @@ from main.errors import NotFound, DuplicatedEntity, FalseArguments
 from main.models.category import Category
 from main.models.item import Item
 from main.schemas.category import CategorySchema
+from main.utils.type_conversions import pagination_params_conversion
 
 category_api = Blueprint('category', __name__)
 
@@ -24,13 +25,17 @@ def get():
     :raise FalseArguments 400: When client passes invalid value for page, per_page
     :return: List of categories, current_page, per_page, total.
     """
+
     page = request.args.get('page', 1)
     per_page = request.args.get('per_page', 5)
 
-    if page < 0 or per_page < 0:
+    pagination_params = pagination_params_conversion(page, per_page)
+
+    if pagination_params is None:
         raise FalseArguments(error_message='Please insert a positive number for page/per_page')
 
-    paginator = Category.query.paginate(page=page, per_page=per_page, error_out=False)
+    paginator = Category.query.paginate(page=pagination_params[0],
+                                        per_page=pagination_params[1], error_out=False)
 
     result = categories_schema.dump(paginator.items)
     return {
@@ -71,8 +76,9 @@ def post():
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: If try to create an existed object.
     :raise Unauthorized 401: If user is not login-ed
-    :return: id of the newly created category
+    :return: the created category
     """
+
     body = request.get_json()
     body['creator_id'] = get_jwt_identity()
 
@@ -103,8 +109,9 @@ def put(_id):
     :raise Unauthorized 401: If user is not login-ed
     :raise Forbidden 403: if user try to update other user's category
     :raise Not Found 404: If category with that id doesn't exist
-    :return: id of the newly created category
+    :return: the updated category
     """
+
     body = request.get_json()
 
     creator_id = get_jwt_identity()
@@ -115,6 +122,7 @@ def put(_id):
     else:
         if creator_id != category.creator_id:
             abort(403)
+
         CategorySchema(partial=True).load(body)
 
         title = body.get('title', None)
@@ -143,6 +151,7 @@ def delete(_id):
     :raise Not Found 404: If category with that id doesn't exist
     :return: 204 response
     """
+
     category = Category.find_by_id(_id)
 
     if category is None:
