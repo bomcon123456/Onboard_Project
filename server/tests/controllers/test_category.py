@@ -1,31 +1,3 @@
-from dotenv import load_dotenv
-from flask import json
-import pytest
-
-from main.app import create_app
-from main.db import db
-
-@pytest.fixture
-def client():
-    load_dotenv()
-
-    app = create_app('testing')
-
-    with app.test_client() as client:
-        with app.app_context():
-            db.init_app(app)
-
-            db.drop_all()
-            db.create_all()
-
-        yield client
-
-
-###############
-#### Utils ####
-###############
-
-
 def register(client, email, password):
     rv = client.post('/users', json={
         'email': email,
