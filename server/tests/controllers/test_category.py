@@ -1,105 +1,238 @@
-def register(client, email, password):
-    rv = client.post('/users', json={
-        'email': email,
-        'password': password
+from tests.helpers import get_item_by_category_id
+
+
+###############
+### GET ALL ###
+###############
+def test_get_all_success(auth_client):
+    # Get all categories (default page=1, per_page = 5)
+    request = auth_client.get('/categories')
+    json_data = request.get_json()
+    data = json_data.get('data', None)
+    total_items = json_data.get('total_items', None)
+    page = json_data.get('page', None)
+    per_page = json_data.get('per_page', None)
+
+    assert request.status_code == 200
+    assert data
+    assert total_items == 2
+    assert page == 1
+    assert per_page == 5
+
+    # Get all categories with different page
+    page = 1
+    per_page = 1
+    request = auth_client.get('/categories?page' + str(page) + '&per_page=' + str(per_page))
+    json_data = request.get_json()
+    data = json_data.get('data', None)
+    total_items = json_data.get('total_items', None)
+
+    assert request.status_code == 200
+    assert data
+    assert len(data) <= per_page
+    assert total_items == 2
+
+
+def test_get_all_fail(auth_client):
+    # Get all categories with invalid query params
+    page = 'f'
+    per_page = 'z'
+    request = auth_client.get('/categories?page' + page + '&per_page=' + per_page)
+
+    assert request.status_code == 400
+
+
+###############
+### GET ONE ###
+###############
+def test_get_one_success(auth_client):
+    # Get a category
+    category_id = 1
+    request = auth_client.get('/categories/' + str(category_id))
+    json_data = request.get_json()
+    data = json_data.get('data', None)
+
+    assert request.status_code == 200
+    assert data
+    assert data.get('id', None) == category_id
+
+
+def test_get_one_fail(auth_client):
+    # Get a category with an invalid id
+    category_id = 100
+    request = auth_client.get('/categories/' + str(category_id))
+
+    assert request.status_code == 404
+
+
+###############
+#### POST ####
+###############
+def test_post_success(auth_client):
+    title = 'Others'
+    description = 'Others stuff'
+    request = auth_client.post('/categories', json={
+        'title': title,
+        'description': description
     })
-    return rv
+    data = request.get_json().get('data', None)
+
+    assert request.status_code == 200
+    assert data
+    assert data.get('title', None) == title
+    assert data.get('description', None) == description
 
 
-def create_category(client, title, description, headers=None):
-    rv = client.post('/categories', json={
+def test_post_duplicate(auth_client):
+    title = 'Seafood'
+    description = 'Stuffs...'
+
+    request = auth_client.post('/categories', json={
         'title': title,
         'description': description
-    }, headers=headers)
-    return rv
+    })
+
+    assert request.status_code == 400
 
 
-def update_category(client, _id, title, description, headers=None):
-    rv = client.put('/categories/'+_id, json={
+def test_post_fail(auth_client):
+    # Title is less than 4 characters
+    title = 'Sea'
+    description = 'Stuffs...'
+
+    request = auth_client.post('/categories', json={
         'title': title,
         'description': description
-    }, headers=headers)
-    return rv
+    })
 
+    assert request.status_code == 400
 
-def delete_category(client, _id, headers=None):
-    rv = client.delete('/categories/'+_id, headers=headers)
-    return rv
+    # Description is less than 4 characters
+    title = 'Landie'
+    description = 'Ste'
+
+    request = auth_client.post('/categories', json={
+        'title': title,
+        'description': description
+    })
+
+    assert request.status_code == 400
+
+    # Wrong params name
+    title = 'Harry Potter'
+    description = 'Muggles...'
+
+    request = auth_client.post('/categories', json={
+        'titlee': title,
+        'descriptions': description
+    })
+
+    assert request.status_code == 400
+
 
 ###############
-#### tests ####
+#### PUT ####
 ###############
+def test_put_success(auth_client):
+    category_id = 1
+    title = 'Minecrafty'
+    description = 'Some description'
+    request = auth_client.put('/categories/' + str(category_id), json={
+        'title': title,
+        'description': description
+    })
+    data = request.get_json().get('data', None)
+
+    assert request.status_code == 200
+    assert data
+    assert data.get('title', None) == title
+    assert data.get('description', None) == description
+
+    title = 'Minecr@ft'
+    request = auth_client.put('/categories/' + str(category_id), json={
+        'title': title
+    })
+    data = request.get_json().get('data', None)
+
+    assert request.status_code == 200
+    assert data
+    assert data.get('title', None) == title
+    assert data.get('description', None) == description
+
+    description = 'Minecr@ft stuffs...'
+    request = auth_client.put('/categories/' + str(category_id), json={
+        'description': description
+    })
+    data = request.get_json().get('data', None)
+
+    assert request.status_code == 200
+    assert data
+    assert data.get('title', None) == title
+    assert data.get('description', None) == description
 
 
-def test_empty_get_categories(client):
-    rv = client.get('/categories')
-    assert b'{"data":[],"page":1,"per_page":5,"total_items":0}\n' in rv.data
+def test_put_duplicate(auth_client):
+    category_id = 1
+    title = 'Seafood'
+
+    request = auth_client.put('/categories/' + str(category_id), json={
+        'title': title
+    })
+
+    assert request.status_code == 400
 
 
-def test_empty_get_category(client):
-    rv = client.get('/categories/1')
-    assert b'{"error_code":404001,"error_message":"Category with this id doesn\'t exist."}\n' in rv.data
+def test_put_fail(auth_client):
+    # Update an unexisted category
+    category_id = 100
+
+    request = auth_client.put('/categories/' + str(category_id), json={
+        'title': 'Title',
+        'description': 'description'
+    })
+
+    assert request.status_code == 404
+
+    # Update another user's category
+    category_id = 2
+
+    request = auth_client.put('/categories/' + str(category_id), json={
+        'title': 'Title',
+        'description': 'description'
+    })
+
+    assert request.status_code == 403
 
 
-def test_unauth_create_category(client):
-    rv = create_category(client=client, title='Minecraft', description='Minecraft stuffs...')
-    assert  b'{"error_message":"Missing Authorization Header"}\n' in rv.data
+###############
+#### DELETE ###
+###############
+def test_delete_success(auth_client):
+    # Test case: delete category with id = 1, this category initially has 2 items.
+    # Expect: category with id = 1 and all items belong to this category will be deleted
+    category_id = 1
+    request = auth_client.delete('/categories/' + str(category_id))
+
+    items = get_item_by_category_id(category_id)
+
+    assert request.status_code == 204
+    assert len(items) == 0
 
 
-def test_register_success(client):
-    rv = register(client, 'admin@gmail.com', '123456')
-    json_data = rv.get_json()
-    assert json_data.get('access_token', None)
+def test_delete_fail(auth_client):
+    # Update an unexisted category
+    category_id = 100
 
+    request = auth_client.delete('/categories/' + str(category_id), json={
+        'title': 'Title',
+        'description': 'description'
+    })
 
-def test_register_fail(client):
-    rv = register(client, 'admin', '123')
-    assert b'{"error_code":400001,"error_message":{"email":["Not a valid email address."],"password":["Shorter than minimum length 4."]}}\n' in rv.data
+    assert request.status_code == 404
 
+    # Delete another user's category
+    category_id = 2
 
-def test_auth_CRUD_category(client):
-    # Register
-    register_repsonse = register(client, 'admin@gmail.com', '123456')
-    token_data = register_repsonse.get_json()
-    access_token = token_data.get('access_token', None)
-    auth = 'Bearer ' + access_token
-    headers = {
-        'Authorization': auth
-    }
+    request = auth_client.delete('/categories/' + str(category_id))
 
-    # Create category
-    category_title = 'Minecraft'
-    category_description = 'Minecraft Stuffs'
-    create_cat_response = create_category(client, category_title, category_description, headers)
-    category_data = create_cat_response.get_json().get('data', None)
-    category_id = category_data.get('id', None)
-
-    assert category_data
-    assert category_id
-    assert category_data.get('title', None) == category_title
-    assert category_data.get('description', None) == category_description
-
-    # Update Category
-    updated_category_title = 'Minecrafte'
-    updated_category_description = 'Updated'
-    update_cat_response = update_category(client, str(category_id),
-                                          updated_category_title, updated_category_description,
-                                          headers)
-
-    updated_category_data = update_cat_response.get_json().get('data', None)
-    updated_category_id = category_data.get('id', None)
-
-    assert updated_category_data
-    assert updated_category_id == category_id
-    assert updated_category_data.get('title', None) == updated_category_title
-    assert updated_category_data.get('description', None) == updated_category_description
-
-    # Delete Category
-    delete_cat_response = delete_category(client, str(category_id), headers)
-    assert delete_cat_response.status_code == 204
-
-
-def test_empty_get_items(client):
-    rv = client.get('/items')
-    assert b'{"data":[],"page":1,"per_page":5,"total_items":0}\n' in rv.data
-
+    assert request.status_code == 403
