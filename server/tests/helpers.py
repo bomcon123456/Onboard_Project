@@ -62,6 +62,13 @@ def create_items(items):
 
 
 def create_test_db():
+    """
+    Create some initial data for the database for unit testing:
+    - 2 users: id=(1,2)
+    - 2 categories: id=(1,2), each category is created by the corresponding user
+    - 3 items: id=(1,2,3)
+    :return:
+    """
     client_user = create_user('admin@gmail.com', '123456')
     other_user = create_user('user@gmail.com', '123456')
 
