@@ -1,6 +1,31 @@
 from tests.helpers import get_item_by_category_id
 
 
+######################
+### UNAUTH REQUEST ###
+######################
+def test_unauth_request(plain_client):
+    title = 'Others'
+    description = 'Others stuff'
+    request = plain_client.post('/categories', json={
+        'title': title,
+        'description': description
+    })
+
+    assert request.status_code == 401
+
+    request = plain_client.put('/categories/1', json={
+        'title': title,
+        'description': description
+    })
+
+    assert request.status_code == 401
+
+    request = plain_client.delete('/categories/1')
+
+    assert request.status_code == 401
+
+
 ###############
 ### GET ALL ###
 ###############
