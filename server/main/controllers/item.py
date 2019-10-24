@@ -1,11 +1,12 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from main.errors import NotFound, DuplicatedEntity, FalseArguments, Forbidden, StatusCodeEnum
+from main.errors import NotFound, DuplicatedEntity, Forbidden, StatusCodeEnum
 from main.models.category import Category
 from main.models.item import Item
+from main.schemas.http import ItemPaginationQuerySchema, PaginationResponseSchema
 from main.schemas.item import ItemSchema
-from main.utils.type_conversions import pagination_params_conversion
+from main.utils.decorators import request_parser
 
 item_api = Blueprint('item', __name__)
 
@@ -14,7 +15,8 @@ items_schema = ItemSchema(many=True)
 
 
 @item_api.route('/items', methods=['GET'])
-def get():
+@request_parser(ItemPaginationQuerySchema)
+def get(query_params):
     """
     GET method for Item
 
@@ -26,29 +28,21 @@ def get():
     :return: List of items, current_page, per_page, total.
     """
 
-    page = request.args.get('page', 1)
-    per_page = request.args.get('per_page', 5)
-    category_id = request.args.get('category_id', None)
-
-    pagination_params = pagination_params_conversion(page, per_page)
-
     query = {}
-    if category_id is not None:
-        query['category_id'] = category_id
-
-    if pagination_params is None:
-        raise FalseArguments(error_message='Please insert a positive number for page/per_page')
+    if query_params['category_id'] is not None:
+        query['category_id'] = query_params['category_id']
 
     paginator = Item.query.filter_by(**query) \
-        .paginate(page=pagination_params[0], per_page=pagination_params[1], error_out=False)
+        .paginate(page=query_params['page'], per_page=query_params['per_page'], error_out=False)
     result = items_schema.dump(paginator.items)
 
-    return {
+    raw_response = {
         'data': result,
         'page': paginator.page,
         'per_page': paginator.per_page,
         'total_items': paginator.total
     }
+    return PaginationResponseSchema().dump(raw_response)
 
 
 @item_api.route('/items/<int:item_id>', methods=['GET'])

@@ -55,7 +55,7 @@ def test_get_all_success(auth_client):
     # Get all categories with different page
     page = 1
     per_page = 1
-    request = auth_client.get('/categories?page' + str(page) + '&per_page=' + str(per_page))
+    request = auth_client.get('/categories?page=' + str(page) + '&per_page=' + str(per_page))
     json_data = request.get_json()
     data = json_data.get('data', None)
     total_items = json_data.get('total_items', None)
@@ -74,7 +74,7 @@ def test_get_all_fail(auth_client):
     # Get all categories with invalid query params
     page = 'f'
     per_page = 'z'
-    request = auth_client.get('/categories?page' + page + '&per_page=' + per_page)
+    request = auth_client.get('/categories?page=' + page + '&per_page=' + per_page)
 
     assert request.status_code == 400
 

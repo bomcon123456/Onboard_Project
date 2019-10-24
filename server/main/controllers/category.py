@@ -2,11 +2,12 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from main.db import db
-from main.errors import NotFound, DuplicatedEntity, FalseArguments, Forbidden, StatusCodeEnum
+from main.errors import NotFound, DuplicatedEntity, Forbidden, StatusCodeEnum
 from main.models.category import Category
 from main.models.item import Item
 from main.schemas.category import CategorySchema
-from main.utils.type_conversions import pagination_params_conversion
+from main.schemas.http import CategoryPaginationQuerySchema, PaginationResponseSchema
+from main.utils.decorators import request_parser
 
 category_api = Blueprint('category', __name__)
 
@@ -15,7 +16,8 @@ categories_schema = CategorySchema(many=True)
 
 
 @category_api.route('/categories', methods=['GET'])
-def get():
+@request_parser(CategoryPaginationQuerySchema)
+def get(query_params):
     """
     GET all method for Category
 
@@ -25,25 +27,16 @@ def get():
     :raise FalseArguments 400: When client passes invalid value for page, per_page
     :return: List of categories, current_page, per_page, total.
     """
-
-    page = request.args.get('page', 1)
-    per_page = request.args.get('per_page', 5)
-
-    pagination_params = pagination_params_conversion(page, per_page)
-
-    if pagination_params is None:
-        raise FalseArguments(error_message='Please insert a positive number for page/per_page')
-
-    paginator = Category.query.paginate(page=pagination_params[0],
-                                        per_page=pagination_params[1], error_out=False)
-
+    paginator = Category.query.paginate(page=query_params['page'],
+                                        per_page=query_params['per_page'], error_out=False)
     result = categories_schema.dump(paginator.items)
-    return {
+    raw_response = {
         'data': result,
         'page': paginator.page,
         'per_page': paginator.per_page,
         'total_items': paginator.total
     }
+    return PaginationResponseSchema().dump(raw_response)
 
 
 @category_api.route('/categories/<int:category_id>', methods=['GET'])

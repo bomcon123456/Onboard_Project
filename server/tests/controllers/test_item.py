@@ -63,7 +63,7 @@ def test_get_all_success(auth_client):
     # Get all items with different page
     page = 1
     per_page = 1
-    request = auth_client.get('/items?page' + str(page) + '&per_page=' + str(per_page))
+    request = auth_client.get('/items?page=' + str(page) + '&per_page=' + str(per_page))
     json_data = request.get_json()
     data = json_data.get('data', None)
     total_items = json_data.get('total_items', None)
