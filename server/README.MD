@@ -15,6 +15,7 @@ virtualenv venv --python=python3
 pip install -r requirements.txt
 3. Fulfill ENVIRONMENT variables, we support loading from .env file placed in the server/ folder:
 DATABASE_URL='SOME_URL'
+TESTING_DATABASE_URL='SOME_URL'
 APP_SECRET_KEY='SOME_KEY'
 4. Install any MySQL connector like:
 - PyMySQL
@@ -29,7 +30,12 @@ Don't know what to choose? Read this awesome answer from Collin: https://stackov
 ``` 
 python run.py
 ```
-
+## How to run test:
+```
+$ pwd
+.../server
+$ pytest --cov-report term-missing --cov='./main'
+```
 ## Project Overview:
 ### Endpoints:
 You can see endpoints and its request/response example here:
