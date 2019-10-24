@@ -1,6 +1,6 @@
 from main.models.category import Category
-from main.models.user import User
 from main.models.item import Item
+from main.models.user import User
 
 
 def create_user(email, password):
@@ -73,24 +73,24 @@ def create_test_db():
     other_user = create_user('user@gmail.com', '123456')
 
     create_categories(
-        [{'title': 'Minecraft', 'description': 'Minecraft stuffs', 'creator_id': client_user.id},
-         {'title': 'Seafood', 'description': 'Seafood stuffs', 'creator_id': other_user.id}])
+            [{'title': 'Minecraft', 'description': 'Minecraft stuffs', 'creator_id': client_user.id},
+             {'title': 'Seafood', 'description': 'Seafood stuffs', 'creator_id': other_user.id}])
 
     create_items(
-        [
-            {
-                'title': 'Minecraft Sword', 'description': 'Sharpy', 'category_id': 1,
-                'creator_id': client_user.id
-            },
-            {
-                'title': 'Minecraft Dirt Block', 'description': 'Very dull...', 'category_id': 1,
-                'creator_id': client_user.id
-            },
-            {
-                'title': 'Crab', 'description': 'Crabby...', 'category_id': 1,
-                'creator_id': other_user.id
-            }
-        ])
+            [
+                {
+                    'title': 'Minecraft Sword', 'description': 'Sharpy', 'category_id': 1,
+                    'creator_id': client_user.id
+                },
+                {
+                    'title': 'Minecraft Dirt Block', 'description': 'Very dull...', 'category_id': 1,
+                    'creator_id': client_user.id
+                },
+                {
+                    'title': 'Crab', 'description': 'Crabby...', 'category_id': 1,
+                    'creator_id': other_user.id
+                }
+            ])
 
     return client_user.id
 
@@ -98,3 +98,9 @@ def create_test_db():
 def get_item_by_category_id(category_id):
     items = Item.query.filter_by(category_id=category_id).all()
     return items
+
+
+def get_category_id_of_item(item_id):
+    item = Item.query.filter_by(id=item_id).first()
+
+    return item.category.id

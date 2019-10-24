@@ -10,7 +10,7 @@ class MyBaseException(Exception):
     """
     status_code = 400
 
-    def __init__(self, error_message, error_code=500001, status_code=None):
+    def __init__(self, error_message='Something bad happened', error_code=500001, status_code=None):
         """
         Constructor
         :param error_code: the message that will be send to client when this is raised
@@ -24,7 +24,6 @@ class MyBaseException(Exception):
 
     def to_response(self):
         """
-
         :return: Response to send to client with status_code
         """
         result = dict()
@@ -39,7 +38,7 @@ class DuplicatedEntity(MyBaseException):
     - Will be raised when user try to create a new entity that violates unique property
     """
 
-    def __init__(self, error_message, error_code=400002):
+    def __init__(self, error_message='Duplicated Entity', error_code=400002):
         super().__init__(error_message, error_code, status_code=400)
 
 
@@ -49,7 +48,7 @@ class FalseArguments(MyBaseException):
     - Will be raised when client passes invalid query arguments
     """
 
-    def __init__(self, error_message, error_code=400003):
+    def __init__(self, error_message='False Arguments', error_code=400003):
         super().__init__(error_message, error_code, status_code=400)
 
 
@@ -59,7 +58,7 @@ class FalseAuthentication(MyBaseException):
     - Will be raised when user login with wrong value like password,...
     """
 
-    def __init__(self, error_message, error_code=400004):
+    def __init__(self, error_message='False Authentication', error_code=400004):
         super().__init__(error_message, error_code, status_code=400)
 
 
@@ -69,7 +68,7 @@ class NotFound(MyBaseException):
     - Will be raised when user try to access an entity does not exist in the database
     """
 
-    def __init__(self, error_message, error_code=404001):
+    def __init__(self, error_message='Not Found', error_code=404001):
         super().__init__(error_message, error_code, status_code=404)
 
 

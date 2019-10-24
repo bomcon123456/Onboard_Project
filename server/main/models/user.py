@@ -11,7 +11,7 @@ class User(ModelMixin, db.Model):
     email = db.Column(db.String(80), unique=True, nullable=False)
     hashed_password = db.Column(db.CHAR(60), nullable=False)
 
-    items = db.relationship('Item', backref="seller", lazy='dynamic')
+    items = db.relationship('Item', lazy='dynamic')
 
     def __init__(self, **kwargs):
         """

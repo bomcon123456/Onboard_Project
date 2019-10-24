@@ -14,7 +14,7 @@ def test_post_success(one_user_in_db_client):
 def test_post_fail(one_user_in_db_client):
     """
     Test case: Login with invalid email/password
-    Expect: Bad request for, 400
+    Expect: Bad request form, 400
     """
     # Email doesn't pass validation
     response = one_user_in_db_client.post('/auth', json={
@@ -33,10 +33,17 @@ def test_post_fail(one_user_in_db_client):
     assert response.status_code == 400
 
     # Unregistered email
-    # Email doesn't pass validation
     response = one_user_in_db_client.post('/auth', json={
         'email': 'test@gmail.com',
         'password': '123456'
+    })
+
+    assert response.status_code == 400
+
+    # Wrong password
+    response = one_user_in_db_client.post('/auth', json={
+        'email': 'admin@gmail.com',
+        'password': 'ferferf'
     })
 
     assert response.status_code == 400

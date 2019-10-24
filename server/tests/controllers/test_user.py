@@ -1,7 +1,7 @@
 def test_post_success(plain_client):
     """
-        Testcase: Register with valid email and password
-        Expected: Response has access_token, user object having email and id
+    Testcase: Register with valid email and password
+    Expected: Response has access_token, user object having email and id
     """
     email = 'admin@gmail.com'
     response = plain_client.post('/users', json={
@@ -19,8 +19,8 @@ def test_post_success(plain_client):
 
 def test_post_fail(plain_client):
     """
-        Testcase: Register with invalid email/ password
-        Expected: Response has status_code 400
+    Testcase: Register with invalid email/ password
+    Expected: Response has status_code 400
     """
     response = plain_client.post('/users', json={
         'email': 'admin',
