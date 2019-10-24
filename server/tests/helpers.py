@@ -1,3 +1,4 @@
+from main.db import db
 from main.models.category import Category
 from main.models.item import Item
 from main.models.user import User
@@ -35,7 +36,8 @@ def create_categories(categories):
     :param categories: list of categories (dict)
     """
     category_objs = [Category(**cat) for cat in categories]
-    Category.bulk_insert(category_objs)
+    db.session.bulk_save_objects(category_objs)
+    db.session.commit()
 
 
 def create_item(title, description, cat_id):
@@ -58,7 +60,8 @@ def create_items(items):
     :param items: list of items (dict)
     """
     item_objs = [Item(**item) for item in items]
-    Item.bulk_insert(item_objs)
+    db.session.bulk_save_objects(item_objs)
+    db.session.commit()
 
 
 def create_test_db():

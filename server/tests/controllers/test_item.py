@@ -1,10 +1,6 @@
 from tests.helpers import get_category_id_of_item
 
 
-def get_item_by_item_id():
-    pass
-
-
 ######################
 ### UNAUTH REQUEST ###
 ######################

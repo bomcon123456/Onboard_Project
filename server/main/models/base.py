@@ -27,23 +27,6 @@ class BaseModel:
         """
         return cls.query.filter_by(id=_id).first()
 
-    @classmethod
-    def bulk_insert(cls, objs, commit=True):
-        """
-        Insert a bunch of Object that is class cls to the database
-        :param objs: List of object of type cls you want to insert
-        :param commit: If you want to commit to the database immediately, default = True
-        :raise Exception: many exception can be raised, seek help(sqlalchemy.exc)
-        :return: Nothing, but objs is added to databases if valid
-        """
-        db.session.bulk_save_objects(objs)
-        if commit:
-            try:
-                db.session.commit()
-            except Exception:
-                db.session.rollback()
-                raise
-
     def update(self, commit=True, **kwargs):
         """
         Update the object and save to database immediately if wanted or just simply update the object

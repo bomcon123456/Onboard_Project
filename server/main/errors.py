@@ -134,11 +134,12 @@ def handle_database_error(error):
     })
     return response, StatusCodeEnum.INTERNAL_SERVER_ERROR
 
-# @error_handlers.app_errorhandler(Exception)
-# def handle_all_errors(error):
-#     response = jsonify({
-#         'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
-#         'error_message': 'Something bad happened.'
-#     })
-#     response.status_code = StatusCodeEnum.INTERNAL_SERVER_ERROR
-#     return response
+
+@error_handlers.app_errorhandler(Exception)
+def handle_all_errors(error):
+    response = jsonify({
+        'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+        'error_message': 'Something bad happened.'
+    })
+    response.status_code = StatusCodeEnum.INTERNAL_SERVER_ERROR
+    return response
