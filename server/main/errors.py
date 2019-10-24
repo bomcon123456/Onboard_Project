@@ -1,6 +1,29 @@
+from enum import IntEnum
+
 from flask import Blueprint, jsonify
 from marshmallow import ValidationError
 from sqlalchemy import exc
+
+
+class StatusCodeEnum(IntEnum):
+    OK = 200
+    NO_CONTENT = 204
+    BAD_REQUEST = 400
+    UNAUTHORIZED = 401
+    FORBIDDEN = 403
+    NOT_FOUND = 404
+    INTERNAL_SERVER_ERROR = 500
+
+
+class ErrorCodeEnum(IntEnum):
+    VALIDATION_ERROR = 400001
+    DUPLICATED_ENTITY = 400002
+    FALSE_ARGUMENTS = 400003
+    FALSE_AUTHENTICATION = 400004
+    NORMAL_FORBIDDEN = 403001
+    NORMAL_NOT_FOUND = 404001
+    INTERNAL_SERVER_ERROR = 500001
+    INTERNAL_DATABASE_ERROR = 500002
 
 
 class MyBaseException(Exception):
@@ -8,9 +31,10 @@ class MyBaseException(Exception):
     BaseException class
     - Simply made to name each exception so we can handle exception more precise
     """
-    status_code = 400
+    status_code = StatusCodeEnum.INTERNAL_SERVER_ERROR
 
-    def __init__(self, error_message='Something bad happened', error_code=500001, status_code=None):
+    def __init__(self, error_message='Something bad happened', error_code=ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+                 status_code=None):
         """
         Constructor
         :param error_code: the message that will be send to client when this is raised
@@ -38,8 +62,8 @@ class DuplicatedEntity(MyBaseException):
     - Will be raised when user try to create a new entity that violates unique property
     """
 
-    def __init__(self, error_message='Duplicated Entity', error_code=400002):
-        super().__init__(error_message, error_code, status_code=400)
+    def __init__(self, error_message='Duplicated Entity', error_code=ErrorCodeEnum.DUPLICATED_ENTITY):
+        super().__init__(error_message, error_code, status_code=StatusCodeEnum.BAD_REQUEST)
 
 
 class FalseArguments(MyBaseException):
@@ -48,8 +72,8 @@ class FalseArguments(MyBaseException):
     - Will be raised when client passes invalid query arguments
     """
 
-    def __init__(self, error_message='False Arguments', error_code=400003):
-        super().__init__(error_message, error_code, status_code=400)
+    def __init__(self, error_message='False Arguments', error_code=ErrorCodeEnum.FALSE_ARGUMENTS):
+        super().__init__(error_message, error_code, status_code=StatusCodeEnum.BAD_REQUEST)
 
 
 class FalseAuthentication(MyBaseException):
@@ -58,8 +82,8 @@ class FalseAuthentication(MyBaseException):
     - Will be raised when user login with wrong value like password,...
     """
 
-    def __init__(self, error_message='False Authentication', error_code=400004):
-        super().__init__(error_message, error_code, status_code=400)
+    def __init__(self, error_message='False Authentication', error_code=ErrorCodeEnum.FALSE_AUTHENTICATION):
+        super().__init__(error_message, error_code, status_code=StatusCodeEnum.BAD_REQUEST)
 
 
 class Forbidden(MyBaseException):
@@ -68,8 +92,8 @@ class Forbidden(MyBaseException):
     - Will be raised when user try to manipulate other user's stuff
     """
 
-    def __init__(self, error_message='Forbidden', error_code=403001):
-        super().__init__(error_message, error_code, status_code=403)
+    def __init__(self, error_message='Forbidden', error_code=ErrorCodeEnum.NORMAL_FORBIDDEN):
+        super().__init__(error_message, error_code, status_code=StatusCodeEnum.FORBIDDEN)
 
 
 class NotFound(MyBaseException):
@@ -78,8 +102,8 @@ class NotFound(MyBaseException):
     - Will be raised when user try to access an entity does not exist in the database
     """
 
-    def __init__(self, error_message='Not Found', error_code=404001):
-        super().__init__(error_message, error_code, status_code=404)
+    def __init__(self, error_message='Not Found', error_code=ErrorCodeEnum.NORMAL_NOT_FOUND):
+        super().__init__(error_message, error_code, status_code=StatusCodeEnum.NOT_FOUND)
 
 
 error_handlers = Blueprint('error_handlers', __name__)
@@ -88,16 +112,6 @@ error_handlers = Blueprint('error_handlers', __name__)
 @error_handlers.app_errorhandler(MyBaseException)
 def handle_not_found(error):
     return error.to_response()
-
-
-@error_handlers.app_errorhandler(403)
-def handle_forbidden(error):
-    response = jsonify({
-        'error_code': 403001,
-        'error_message': 'You are not authorized to do this action.',
-    })
-    response.status_code = 403
-    return response
 
 
 @error_handlers.app_errorhandler(ValidationError)
