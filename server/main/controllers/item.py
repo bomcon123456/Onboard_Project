@@ -1,7 +1,7 @@
-from flask import Blueprint, request, abort
+from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from main.errors import NotFound, DuplicatedEntity, FalseArguments
+from main.errors import NotFound, DuplicatedEntity, FalseArguments, Forbidden
 from main.models.category import Category
 from main.models.item import Item
 from main.schemas.item import ItemSchema
@@ -39,7 +39,7 @@ def get():
     if pagination_params is None:
         raise FalseArguments(error_message='Please insert a positive number for page/per_page')
 
-    paginator = Item.query.filter_by(**query)\
+    paginator = Item.query.filter_by(**query) \
         .paginate(page=pagination_params[0], per_page=pagination_params[1], error_out=False)
     result = items_schema.dump(paginator.items)
 
@@ -143,7 +143,7 @@ def put(_id):
             raise DuplicatedEntity(error_message='Item with this title has already existed.')
 
         if item.creator_id != get_jwt_identity():
-            abort(403)
+            raise Forbidden('You can\'t update other users\'s item')
         item.title = title or item.title
         item.description = body.get('description', item.description)
         item.category_id = category_id or item.category_id
@@ -172,7 +172,7 @@ def delete(_id):
         raise NotFound(error_message='Item with this id doesn\'t exist.')
     else:
         if item.creator_id != get_jwt_identity():
-            abort(403)
+            raise Forbidden('You can\'t delete other users\'s item')
         item.delete()
 
     return {}, 204

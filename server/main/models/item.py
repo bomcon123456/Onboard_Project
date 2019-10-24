@@ -1,8 +1,8 @@
 from main.db import db
-from main.models.basemodel import ModelMixin
+from main.models.base import BaseModel
 
 
-class Item(ModelMixin, db.Model):
+class Item(BaseModel, db.Model):
     __tablename__ = 'items'
 
     id = db.Column(db.Integer, primary_key=True)

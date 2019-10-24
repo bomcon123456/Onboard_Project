@@ -3,7 +3,7 @@ from datetime import datetime
 from main.db import db
 
 
-class ModelMixin:
+class BaseModel:
     """
     Base Model Mixin
     - Provide CRUD operation

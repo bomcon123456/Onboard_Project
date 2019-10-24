@@ -62,6 +62,16 @@ class FalseAuthentication(MyBaseException):
         super().__init__(error_message, error_code, status_code=400)
 
 
+class Forbidden(MyBaseException):
+    """
+    Forbidden Exception
+    - Will be raised when user try to manipulate other user's stuff
+    """
+
+    def __init__(self, error_message='Forbidden', error_code=403001):
+        super().__init__(error_message, error_code, status_code=403)
+
+
 class NotFound(MyBaseException):
     """
     Not Found Exception
@@ -105,7 +115,7 @@ def handle_database_error(error):
     error_info = error.orig.args
 
     response = jsonify({
-        'error_code': 500001,
+        'error_code': 500002,
         'error_message': error_info[1]
     })
     return response, 500

@@ -1,8 +1,8 @@
-from flask import Blueprint, request, abort
+from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from main.db import db
-from main.errors import NotFound, DuplicatedEntity, FalseArguments
+from main.errors import NotFound, DuplicatedEntity, FalseArguments, Forbidden
 from main.models.category import Category
 from main.models.item import Item
 from main.schemas.category import CategorySchema
@@ -121,7 +121,7 @@ def put(_id):
         raise NotFound(error_message='Category with this id doesn\'t exist.')
     else:
         if creator_id != category.creator_id:
-            abort(403)
+            raise Forbidden('You can\'t update other users\'s category')
 
         CategorySchema(partial=True).load(body)
 
@@ -159,7 +159,7 @@ def delete(_id):
     else:
         creator_id = get_jwt_identity()
         if creator_id != category.creator_id:
-            abort(403)
+            raise Forbidden('You can\'t delete other users\'s category')
         db.session.query(Item).filter(Item.category_id == _id).delete()
         category.delete()
 

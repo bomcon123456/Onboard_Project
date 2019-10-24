@@ -1,10 +1,10 @@
 from passlib.hash import bcrypt
 
 from main.db import db
-from main.models.basemodel import ModelMixin
+from main.models.base import BaseModel
 
 
-class User(ModelMixin, db.Model):
+class User(BaseModel, db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
