@@ -8,7 +8,7 @@ from main.schemas.user import UserRegisterSchema, UserSchema
 user_api = Blueprint('users', __name__)
 
 
-@user_api.route('', methods=['POST'])
+@user_api.route('/users', methods=['POST'])
 def register():
     """
     Create new user

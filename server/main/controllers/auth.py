@@ -9,7 +9,7 @@ from main.schemas.user import UserRegisterSchema, UserSchema
 auth_api = Blueprint('auth', __name__)
 
 
-@auth_api.route('', methods=['POST'])
+@auth_api.route('/auth', methods=['POST'])
 def login():
     """
     POST Authenticate user

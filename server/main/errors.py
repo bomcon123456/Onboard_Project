@@ -117,10 +117,10 @@ def handle_not_found(error):
 @error_handlers.app_errorhandler(ValidationError)
 def handle_invalid_form(error):
     response = jsonify({
-        'error_code': 400001,
+        'error_code': ErrorCodeEnum.VALIDATION_ERROR,
         'error_message': error.messages,
     })
-    response.status_code = 400
+    response.status_code = StatusCodeEnum.BAD_REQUEST
     return response
 
 
@@ -129,17 +129,17 @@ def handle_database_error(error):
     error_info = error.orig.args
 
     response = jsonify({
-        'error_code': 500002,
+        'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
         'error_message': error_info[1]
     })
-    return response, 500
+    return response, StatusCodeEnum.INTERNAL_SERVER_ERROR
 
 
 @error_handlers.app_errorhandler(Exception)
 def handle_all_errors(error):
     response = jsonify({
-        'error_code': 50001,
+        'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
         'error_message': 'Something bad happened.'
     })
-    response.status_code = 500
+    response.status_code = StatusCodeEnum.INTERNAL_SERVER_ERROR
     return response

@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from main.db import db
-from main.errors import NotFound, DuplicatedEntity, FalseArguments, Forbidden
+from main.errors import NotFound, DuplicatedEntity, FalseArguments, Forbidden, StatusCodeEnum
 from main.models.category import Category
 from main.models.item import Item
 from main.schemas.category import CategorySchema
@@ -14,7 +14,7 @@ category_schema = CategorySchema()
 categories_schema = CategorySchema(many=True)
 
 
-@category_api.route('', methods=['GET'])
+@category_api.route('/categories', methods=['GET'])
 def get():
     """
     GET all method for Category
@@ -46,17 +46,17 @@ def get():
     }
 
 
-@category_api.route('/<int:_id>', methods=['GET'])
-def get_one(_id):
+@category_api.route('/categories/<int:category_id>', methods=['GET'])
+def get_one(category_id):
     """
     GET one method for Category
-    :param _id: id of the category want to get
+    :param category_id: id of the category want to get
 
     :raise Not Found 404: If category with that id doesn't exist
     :return: Category with that id
     """
 
-    category = Category.find_by_id(_id)
+    category = Category.find_by_id(category_id)
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
     else:
@@ -65,7 +65,7 @@ def get_one(_id):
         }
 
 
-@category_api.route('', methods=['POST'])
+@category_api.route('/categories', methods=['POST'])
 @jwt_required
 def post():
     """
@@ -95,12 +95,12 @@ def post():
     }
 
 
-@category_api.route('/<int:_id>', methods=['PUT'])
+@category_api.route('/categories/<int:category_id>', methods=['PUT'])
 @jwt_required
-def put(_id):
+def put(category_id):
     """
     PUT method for Category
-    :param _id: ID of the category we want to update
+    :param category_id: ID of the category we want to update
     :bodyparam title: Title of the category
     :bodyparam description: Description of the category
 
@@ -116,7 +116,7 @@ def put(_id):
 
     creator_id = get_jwt_identity()
 
-    category = Category.find_by_id(_id)
+    category = Category.find_by_id(category_id)
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
     else:
@@ -139,12 +139,12 @@ def put(_id):
     }
 
 
-@category_api.route('/<int:_id>', methods=['DELETE'])
+@category_api.route('/categories/<int:category_id>', methods=['DELETE'])
 @jwt_required
-def delete(_id):
+def delete(category_id):
     """
     DELETE method for Category
-    :param _id: ID of the category we want to delete
+    :param category_id: ID of the category we want to delete
 
     :raise Unauthorized 401: If user is not login-ed
     :raise Forbidden 403: if user try to update other user's category
@@ -152,7 +152,7 @@ def delete(_id):
     :return: 204 response
     """
 
-    category = Category.find_by_id(_id)
+    category = Category.find_by_id(category_id)
 
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
@@ -160,7 +160,7 @@ def delete(_id):
         creator_id = get_jwt_identity()
         if creator_id != category.creator_id:
             raise Forbidden('You can\'t delete other users\'s category')
-        db.session.query(Item).filter(Item.category_id == _id).delete()
+        db.session.query(Item).filter(Item.category_id == category_id).delete()
         category.delete()
 
-    return {}, 204
+    return {}, StatusCodeEnum.NO_CONTENT
