@@ -6,7 +6,7 @@ from main.db import db
 class BaseModel:
     """
     Base Model Mixin
-    - Provide CRUD operation
+    - Provide CRD operation (Update and bulk_insert have been removed since we dont use those in this project)
     - Add timestamps (created, updated)
     - Usage: Class AModel(ModelMixin, db.Model)
     """
@@ -26,18 +26,6 @@ class BaseModel:
         :return: The object that match that id, None if not found.
         """
         return cls.query.filter_by(id=_id).first()
-
-    def update(self, commit=True, **kwargs):
-        """
-        Update the object and save to database immediately if wanted or just simply update the object
-        :param commit: If you want to commit to the database immediately, default = True
-        :param kwargs: all the arguments to add in
-        :raise Exception: many exception can be raised, seek help(sqlalchemy.exc)
-        :return: return as save() if commit = True or return the object itself
-        """
-        for attr, value in kwargs.items():
-            setattr(self, attr, value)
-        return commit and self.save() or self
 
     def save(self, commit=True):
         """

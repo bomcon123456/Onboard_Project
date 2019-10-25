@@ -18,8 +18,7 @@ class StatusCodeEnum(IntEnum):
 class ErrorCodeEnum(IntEnum):
     VALIDATION_ERROR = 400001
     DUPLICATED_ENTITY = 400002
-    FALSE_ARGUMENTS = 400003
-    FALSE_AUTHENTICATION = 400004
+    FALSE_AUTHENTICATION = 400003
     NORMAL_FORBIDDEN = 403001
     NORMAL_NOT_FOUND = 404001
     INTERNAL_SERVER_ERROR = 500001
@@ -63,16 +62,6 @@ class DuplicatedEntity(MyBaseException):
     """
 
     def __init__(self, error_message='Duplicated Entity', error_code=ErrorCodeEnum.DUPLICATED_ENTITY):
-        super().__init__(error_message, error_code, status_code=StatusCodeEnum.BAD_REQUEST)
-
-
-class FalseArguments(MyBaseException):
-    """
-    False Arguments Exception
-    - Will be raised when client passes invalid query arguments
-    """
-
-    def __init__(self, error_message='False Arguments', error_code=ErrorCodeEnum.FALSE_ARGUMENTS):
         super().__init__(error_message, error_code, status_code=StatusCodeEnum.BAD_REQUEST)
 
 

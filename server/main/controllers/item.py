@@ -24,7 +24,7 @@ def get(query_params):
     :queryparam per_page: item per page that client wants to get, default = 5
     :queryparam category_id: category to which the client wants to get the items belong
 
-    :raise FalseArguments 400: When client passes invalid value for page, per_page
+    :raise ValidationError 400: When client passes invalid value for page, per_page
     :return: List of items, current_page, per_page, total.
     """
 
@@ -90,7 +90,7 @@ def post():
         raise NotFound(error_message='Category with this id doesn\'t exist.')
 
     if Item.query.filter_by(title=body['title']).first():
-        raise DuplicatedEntity(error_message='Item with this id exists.')
+        raise DuplicatedEntity(error_message='Item with this title exists.')
 
     item = Item(**body)
     item.save()

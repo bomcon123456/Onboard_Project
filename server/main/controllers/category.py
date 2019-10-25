@@ -24,7 +24,7 @@ def get(query_params):
     :queryparam page: page that client wants to get, default = 1
     :queryparam per_page: item per page that client wants to get, default = 5
 
-    :raise FalseArguments 400: When client passes invalid value for page, per_page
+    :raise Validation Error 400: When client passes invalid value for page, per_page
     :return: List of categories, current_page, per_page, total.
     """
     paginator = Category.query.paginate(page=query_params['page'],
@@ -78,7 +78,7 @@ def post():
     category_schema.load(body)
 
     if Category.query.filter_by(title=body['title']).first():
-        raise DuplicatedEntity(error_message='Category with this id has already existed.')
+        raise DuplicatedEntity(error_message='Category with this title has already existed.')
 
     category = Category(**body)
     category.save()

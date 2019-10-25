@@ -11,6 +11,7 @@ class User(BaseModel, db.Model):
     email = db.Column(db.String(80), unique=True, nullable=False)
     hashed_password = db.Column(db.CHAR(60), nullable=False)
 
+    # lazy='dynamic' will return a query object, so we can do more operation like filter_by,...
     items = db.relationship('Item', lazy='dynamic')
 
     def __init__(self, **kwargs):

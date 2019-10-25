@@ -4,7 +4,8 @@ from passlib.hash import bcrypt
 
 from main.errors import FalseAuthentication
 from main.models.user import User
-from main.schemas.user import UserRegisterSchema, UserSchema
+from main.schemas.http import AuthResponseSchema
+from main.schemas.user import UserRegisterSchema
 
 auth_api = Blueprint('auth', __name__)
 
@@ -32,6 +33,8 @@ def login():
         raise FalseAuthentication('Cant login with the provided information.')
     if bcrypt.verify(password, user.hashed_password):
         access_token = create_access_token(identity=user.id)
-        return {'access_token': access_token, 'user': UserSchema(only=('id', 'email')).dump(user)}
+        raw_data = {'access_token': access_token, 'user': user}
+
+        return AuthResponseSchema().dump(raw_data)
     else:
         raise FalseAuthentication('Cant login with the provided information.')

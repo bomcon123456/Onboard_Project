@@ -3,7 +3,8 @@ from flask_jwt_extended import create_access_token
 
 from main.errors import DuplicatedEntity
 from main.models.user import User
-from main.schemas.user import UserRegisterSchema, UserSchema
+from main.schemas.http import AuthResponseSchema
+from main.schemas.user import UserRegisterSchema
 
 user_api = Blueprint('users', __name__)
 
@@ -32,8 +33,8 @@ def register():
     user.save()
 
     access_token = create_access_token(identity=user.id)
-
-    return {
+    raw_data = {
         'access_token': access_token,
-        'user': UserSchema(only=('id', 'email')).dump(user)
+        'user': user
     }
+    return AuthResponseSchema().dump(raw_data)
