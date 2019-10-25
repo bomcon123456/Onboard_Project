@@ -4,7 +4,7 @@ This is a Python Flask Application. It serves multiple endpoints allowing user t
 
 ## Prerequisites:
 - Python 3.7
-- MySQL
+- MySQL 5.7
 
 ## How to install:
 You should create a virtual environment so that it will not affect other projects.
@@ -39,7 +39,7 @@ $ pytest --cov-report term-missing --cov='./main'
 ## Project Overview:
 ### Endpoints:
 You can see endpoints and its request/response example here:
-[API documentation](https://documenter.getpostman.com/view/6660523/SVtVVoQ3?version=latest)
+[API documentation](https://documenter.getpostman.com/view/6660523/SVtVVoQ3)
 
 ### Entity relationship:
 ![Entity-R](../Markdown/Onboard_EntityRelation.png)
