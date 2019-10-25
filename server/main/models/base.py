@@ -13,6 +13,9 @@ class BaseModel:
     # Add this so that if this table is already presented in the given MetaData, apply further arguments within the
     # constructor to the existing table.
     # MetaData: A collection of Table objects and their associated schema constructs.
+    # Why add rollback: Since we give user permission to set commit=False, there would be cases session commit a lot
+    # of transactions in one session, so we should rollback to the start rather than keep the successful transactions
+    # in that session
     __table_args__ = {'extend_existing': True}
 
     created = db.Column(db.DateTime, default=datetime.now)
@@ -25,7 +28,7 @@ class BaseModel:
         :param _id: id of the object you want to find
         :return: The object that match that id, None if not found.
         """
-        return cls.query.filter_by(id=_id).first()
+        return cls.query.get(_id)
 
     def save(self, commit=True):
         """

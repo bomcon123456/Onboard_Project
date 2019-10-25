@@ -30,12 +30,12 @@ def test_post_fail(plain_client):
     assert response.status_code == 400
 
 
-def test_post_duplicated(one_user_in_db_client):
+def test_post_duplicated(login_client):
     """
         Testcase: Register with used email
         Expected: Response has status_code 400
     """
-    response = one_user_in_db_client.post('/users', json={
+    response = login_client.post('/users', json={
         'email': 'admin@gmail.com',
         'password': '12345'
     })

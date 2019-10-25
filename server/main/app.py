@@ -12,11 +12,11 @@ def create_app(app_type):
     app = Flask(__name__)
 
     configs = {
-        'testing': 'configs/testing.py',
-        'default': 'configs/default.py'
+        'testing': "main.configs.testing_config.TestingConfig",
+        'default': "main.configs.base_config.BaseConfig"
     }
 
-    app.config.from_pyfile(configs[app_type])
+    app.config.from_object(configs[app_type])
 
     jwt = JWTManager(app)
 

@@ -1,5 +1,5 @@
-from dotenv import load_dotenv
 import pytest
+from dotenv import load_dotenv
 from flask_jwt_extended import create_access_token
 
 from main.app import create_app
@@ -24,7 +24,7 @@ def plain_client():
 
 
 @pytest.fixture
-def one_user_in_db_client():
+def login_client():
     """
     This fixture create the database consisting one user
     :return:

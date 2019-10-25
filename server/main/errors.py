@@ -19,15 +19,16 @@ class ErrorCodeEnum(IntEnum):
     VALIDATION_ERROR = 400001
     DUPLICATED_ENTITY = 400002
     FALSE_AUTHENTICATION = 400003
+    BAD_REQUEST = 400004
     NORMAL_FORBIDDEN = 403001
     NORMAL_NOT_FOUND = 404001
     INTERNAL_SERVER_ERROR = 500001
     INTERNAL_DATABASE_ERROR = 500002
 
 
-class MyBaseException(Exception):
+class AppBaseException(Exception):
     """
-    BaseException class
+    BaseException class ( if we name the class BaseException, it will shadow the built-in exception)
     - Simply made to name each exception so we can handle exception more precise
     """
     status_code = StatusCodeEnum.INTERNAL_SERVER_ERROR
@@ -36,8 +37,9 @@ class MyBaseException(Exception):
                  status_code=None):
         """
         Constructor
-        :param error_code: the message that will be send to client when this is raised
-        :param status_code: status_code of the response
+        :param error_code: The encoded code for the error we're raising
+        :param error_message: The details of the error
+        :param status_code: Status code of the response
         """
         super().__init__(self)
         self.error_code = error_code
@@ -47,15 +49,27 @@ class MyBaseException(Exception):
 
     def to_response(self):
         """
-        :return: Response to send to client with status_code
+        :return: Return a tuple consisting response body and its status code
         """
-        result = dict()
-        result['error_code'] = self.error_code
-        result['error_message'] = self.error_message
+        result = {
+            'error_code': self.error_code,
+            'error_message': self.error_message
+        }
+
         return result, self.status_code
 
 
-class DuplicatedEntity(MyBaseException):
+class BadRequest(AppBaseException):
+    """
+    Bad Request Exception
+    - Will be raised when client send a bad request generally (raised when doesnt match other 400xxx)
+    """
+
+    def __init__(self, error_message='Bad Request', error_code=ErrorCodeEnum.BAD_REQUEST):
+        super().__init__(error_message, error_code, status_code=StatusCodeEnum.BAD_REQUEST)
+
+
+class DuplicatedEntity(AppBaseException):
     """
     Duplicated Entity Exception
     - Will be raised when user try to create a new entity that violates unique property
@@ -65,17 +79,17 @@ class DuplicatedEntity(MyBaseException):
         super().__init__(error_message, error_code, status_code=StatusCodeEnum.BAD_REQUEST)
 
 
-class FalseAuthentication(MyBaseException):
+class FalseAuthentication(AppBaseException):
     """
     False Authentication Exception
-    - Will be raised when user login with wrong value like password,...
+    - Will be raised when user login with wrong value like email, password
     """
 
     def __init__(self, error_message='False Authentication', error_code=ErrorCodeEnum.FALSE_AUTHENTICATION):
         super().__init__(error_message, error_code, status_code=StatusCodeEnum.BAD_REQUEST)
 
 
-class Forbidden(MyBaseException):
+class Forbidden(AppBaseException):
     """
     Forbidden Exception
     - Will be raised when user try to manipulate other user's stuff
@@ -85,7 +99,7 @@ class Forbidden(MyBaseException):
         super().__init__(error_message, error_code, status_code=StatusCodeEnum.FORBIDDEN)
 
 
-class NotFound(MyBaseException):
+class NotFound(AppBaseException):
     """
     Not Found Exception
     - Will be raised when user try to access an entity does not exist in the database
@@ -98,8 +112,8 @@ class NotFound(MyBaseException):
 error_handlers = Blueprint('error_handlers', __name__)
 
 
-@error_handlers.app_errorhandler(MyBaseException)
-def handle_not_found(error):
+@error_handlers.app_errorhandler(AppBaseException)
+def handle_base_exception(error):
     return error.to_response()
 
 
@@ -109,8 +123,8 @@ def handle_invalid_form(error):
         'error_code': ErrorCodeEnum.VALIDATION_ERROR,
         'error_message': error.messages,
     })
-    response.status_code = StatusCodeEnum.BAD_REQUEST
-    return response
+
+    return response, StatusCodeEnum.BAD_REQUEST
 
 
 @error_handlers.app_errorhandler(exc.IntegrityError)
@@ -121,14 +135,15 @@ def handle_database_error(error):
         'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
         'error_message': error_info[1]
     })
+
     return response, StatusCodeEnum.INTERNAL_SERVER_ERROR
 
 
 @error_handlers.app_errorhandler(Exception)
-def handle_all_errors(error):
+def handle_other_errors(error):
     response = jsonify({
         'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
         'error_message': 'Something bad happened.'
     })
-    response.status_code = StatusCodeEnum.INTERNAL_SERVER_ERROR
-    return response
+
+    return response, StatusCodeEnum.INTERNAL_SERVER_ERROR

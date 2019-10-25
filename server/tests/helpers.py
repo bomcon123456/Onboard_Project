@@ -98,12 +98,16 @@ def create_test_db():
     return client_user.id
 
 
-def get_item_by_category_id(category_id):
+def get_items_by_category_id(category_id):
     items = Item.query.filter_by(category_id=category_id).all()
     return items
 
 
 def get_category_id_of_item(item_id):
-    item = Item.query.filter_by(id=item_id).first()
-
+    item = Item.query.get(item_id)
     return item.category.id
+
+
+def get_user_email(user_id):
+    user = User.query.get(user_id)
+    return user.email

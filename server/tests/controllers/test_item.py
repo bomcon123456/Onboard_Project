@@ -1,39 +1,6 @@
 from tests.helpers import get_category_id_of_item
 
 
-######################
-### UNAUTH REQUEST ###
-######################
-def test_unauth_request(plain_client):
-    """
-    Test Case: try to manipulate item while not logged in
-    Expect: Unauthorized 401
-    """
-    # Create item
-    title = 'Minecraft Hoe'
-    description = 'I have a hoe lolol'
-    category_id = 1
-    request = plain_client.post('/items', json={
-        'title': title,
-        'description': description,
-        'category_id': category_id
-    })
-
-    assert request.status_code == 401
-
-    # Update item
-    request = plain_client.put('/items/1', json={
-        'title': title
-    })
-
-    assert request.status_code == 401
-
-    # Delete item
-    request = plain_client.delete('/items/1')
-
-    assert request.status_code == 401
-
-
 ###############
 ### GET ALL ###
 ###############
@@ -66,6 +33,7 @@ def test_get_all_success(auth_client):
 
     assert request.status_code == 200
     assert data
+    # @TODO: 2 cases, [] and [...]
     assert len(data) <= per_page
     assert total_items == 3
 
