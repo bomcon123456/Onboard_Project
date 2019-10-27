@@ -17,14 +17,6 @@ def create_pagination_response_schema(data_schema, instance=True):
     return PaginationResponseSchema
 
 
-# class ItemPaginationResponseSchema(PaginationResponseSchema):
-#     data = fields.List(fields.Nested(ItemSchema(many=True)), required=True)
-#
-#
-# class CategoryPaginationResponseSchema(PaginationResponseSchema):
-#     data = fields.List(fields.Nested(CategorySchema(many=True)), required=True)
-
-
 class AuthResponseSchema(Schema):
     access_token = fields.String(required=True)
     user = fields.Nested(UserSchema(only=('id', 'email')), required=True)
