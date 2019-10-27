@@ -12,6 +12,3 @@ class ItemSchema(Schema):
     creator_id = fields.Integer(required=True)
     created = fields.DateTime(dump_only=True)
     updated = fields.DateTime(dump_only=True)
-
-    class Meta:
-        strict = True

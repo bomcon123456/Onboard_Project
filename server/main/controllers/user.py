@@ -25,7 +25,7 @@ def register(body_params):
     :return: access_token and id of the newly created user
     """
     email = body_params.get('email')
-    if email and User.query.filter_by(email=email).first():
+    if User.query.filter_by(email=email).first():
         raise DuplicatedEntity(error_message='User with this email exists.')
 
     user = User(**body_params)

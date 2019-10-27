@@ -6,7 +6,7 @@ from main.models.category import Category
 from main.models.item import Item
 from main.schemas.item import ItemSchema
 from main.schemas.request import ItemPaginationQuerySchema
-from main.schemas.response import PaginationResponseSchema
+from main.schemas.response import create_pagination_response_schema
 from main.utils.decorators.request_parser import request_parser
 
 item_api = Blueprint('item', __name__)
@@ -35,15 +35,14 @@ def gel_all_items(query_params):
 
     paginator = Item.query.filter_by(**query) \
         .paginate(page=query_params['page'], per_page=query_params['per_page'], error_out=False)
-    result = items_schema.dump(paginator.items)
     raw_response = {
-        'data': result,
+        'data': paginator.items,
         'page': paginator.page,
         'per_page': paginator.per_page,
         'total_items': paginator.total
     }
 
-    return PaginationResponseSchema().dump(raw_response)
+    return create_pagination_response_schema(data_schema=items_schema).dump(raw_response)
 
 
 @item_api.route('/items/<int:item_id>', methods=['GET'])
@@ -71,9 +70,9 @@ def create_one_item(body_params):
     """
     Create an item
     :param body_params:
-    :bodyparams: title: Title of the item
-    :bodyparams: description: Description of the item
-    :bodypqrams: category_id: Category of the item
+    :bodyparam title: Title of the item
+    :bodyparam description: Description of the item
+    :bodyparam category_id: Identifier of the category to which this item will belong
 
     :raise: ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: If try to create an existed object.
@@ -81,13 +80,12 @@ def create_one_item(body_params):
     :raise NotFound 404: If category_id is not valid
     :return: the created item
     """
-    body_params['creator_id'] = get_jwt_identity()
-
     if Category.find_by_id(body_params['category_id']) is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
     if Item.query.filter_by(title=body_params['title']).first():
         raise DuplicatedEntity(error_message='Item with this title exists.')
 
+    body_params['creator_id'] = get_jwt_identity()
     item = Item(**body_params)
     item.save()
 
@@ -105,8 +103,8 @@ def update_one_item(item_id, body_params):
 
     :param item_id: ID of the item we want to update
     :param body_params:
-    :body_params: title: Title of the item
-    :body_params: description: Description of the item
+    :bodyparam title: Title of the item
+    :bodyparam description: Description of the item
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: if there is a item with the title.

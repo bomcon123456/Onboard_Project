@@ -1,4 +1,5 @@
 from main.db import db
+from main.errors import StatusCodeEnum
 from main.models.category import Category
 from main.models.item import Item
 from main.models.user import User
@@ -70,7 +71,7 @@ def create_test_db():
     - 2 users: id=(1,2)
     - 2 categories: id=(1,2), each category is created by the corresponding user
     - 3 items: id=(1,2,3)
-    :return:
+    :return: Identifier of the user we use for authentication
     """
     client_user = create_user('admin@gmail.com', '123456')
     other_user = create_user('user@gmail.com', '123456')
@@ -111,3 +112,23 @@ def get_category_id_of_item(item_id):
 def get_user_email(user_id):
     user = User.query.get(user_id)
     return user.email
+
+
+def get_item_by_id(item_id):
+    item = Item.query.get(item_id)
+    return item
+
+
+def get_category_by_id(category_id):
+    category = Category.query.get(category_id)
+    return category
+
+
+def assert_item_create_update_no_exceptions(status_code, test_data, test_category, original_title, original_description,
+                                            original_cat_id):
+    assert status_code == StatusCodeEnum.OK
+    assert test_data
+    assert test_data.get('title') == original_title
+    assert test_data.get('description') == original_description
+    assert test_category
+    assert test_category.get('id') == original_cat_id

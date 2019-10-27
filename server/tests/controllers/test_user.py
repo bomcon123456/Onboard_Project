@@ -1,8 +1,7 @@
-def test_post_success(plain_client):
-    """
-    Testcase: Register with valid email and password
-    Expected: Response has access_token, user object having email and id
-    """
+from main.errors import StatusCodeEnum, ErrorCodeEnum
+
+
+def test_register_no_exceptions(plain_client):
     email = 'admin@gmail.com'
     response = plain_client.post('/users', json={
         'email': email,
@@ -17,27 +16,33 @@ def test_post_success(plain_client):
     assert user.get('email', None) == email
 
 
-def test_post_fail(plain_client):
-    """
-    Testcase: Register with invalid email/ password
-    Expected: Response has status_code 400
-    """
-    response = plain_client.post('/users', json={
+def test_register_exceptions(login_client):
+    # Email doesn't pass validation
+    response = login_client.post('/users', json={
         'email': 'admin',
-        'password': '1234'
+        'password': '123456'
     })
+    json_data = response.get_json()
 
-    assert response.status_code == 400
+    assert response.status_code == StatusCodeEnum.BAD_REQUEST
+    assert json_data.get('error_code') == ErrorCodeEnum.VALIDATION_ERROR
 
+    # Password doesn't pass validation
+    response = login_client.post('/users', json={
+        'email': 'admin@gmail.com',
+        'password': '123'
+    })
+    json_data = response.get_json()
 
-def test_post_duplicated(login_client):
-    """
-        Testcase: Register with used email
-        Expected: Response has status_code 400
-    """
+    assert response.status_code == StatusCodeEnum.BAD_REQUEST
+    assert json_data.get('error_code') == ErrorCodeEnum.VALIDATION_ERROR
+
+    # Duplicated user email
     response = login_client.post('/users', json={
         'email': 'admin@gmail.com',
         'password': '12345'
     })
+    json_data = response.get_json()
 
-    assert response.status_code == 400
+    assert response.status_code == StatusCodeEnum.BAD_REQUEST
+    assert json_data.get('error_code') == ErrorCodeEnum.DUPLICATED_ENTITY

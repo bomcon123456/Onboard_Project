@@ -7,7 +7,7 @@ from main.models.category import Category
 from main.models.item import Item
 from main.schemas.category import CategorySchema
 from main.schemas.request import BasePaginationQuerySchema
-from main.schemas.response import PaginationResponseSchema
+from main.schemas.response import create_pagination_response_schema
 from main.utils.decorators.request_parser import request_parser
 
 category_api = Blueprint('category', __name__)
@@ -30,15 +30,14 @@ def get_all_categories(query_params):
     """
     paginator = Category.query.paginate(page=query_params['page'],
                                         per_page=query_params['per_page'], error_out=False)
-    result = categories_schema.dump(paginator.items)
     raw_response = {
-        'data': result,
+        'data': paginator.items,
         'page': paginator.page,
         'per_page': paginator.per_page,
         'total_items': paginator.total
     }
 
-    return PaginationResponseSchema().dump(raw_response)
+    return create_pagination_response_schema(data_schema=categories_schema).dump(raw_response)
 
 
 @category_api.route('/categories/<int:category_id>', methods=['GET'])
@@ -75,6 +74,7 @@ def create_one_category(body_params):
     """
     if Category.query.filter_by(title=body_params['title']).first():
         raise DuplicatedEntity(error_message='Category with this title has already existed.')
+
     body_params['creator_id'] = get_jwt_identity()
     category = Category(**body_params)
     category.save()
@@ -102,10 +102,10 @@ def update_one_category(category_id, body_params):
     :raise Not Found 404: If category with that id doesn't exist
     :return: the updated category
     """
-
     category = Category.find_by_id(category_id)
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
+
     creator_id = get_jwt_identity()
     if creator_id != category.creator_id:
         raise Forbidden('You can\'t update other users\'s category')
@@ -140,10 +140,11 @@ def delete_one_category(category_id):
     category = Category.find_by_id(category_id)
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
+
     creator_id = get_jwt_identity()
     if creator_id != category.creator_id:
         raise Forbidden('You can\'t delete other users\'s category')
-    
+
     db.session.query(Item).filter(Item.category_id == category_id).delete()  # delete all items in this category
     category.delete()
 

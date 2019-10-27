@@ -1,14 +1,10 @@
 from flask_jwt_extended import decode_token
 
-from main.errors import StatusCodeEnum
+from main.errors import StatusCodeEnum, ErrorCodeEnum
 from tests.helpers import get_user_email
 
 
 def test_login_no_exceptions(login_client):
-    """
-    Test case: Login with a valid email and password
-    Expect: return access_token, id
-    """
     response = login_client.post('/auth', json={
         'email': 'admin@gmail.com',
         'password': '123456'
@@ -23,38 +19,42 @@ def test_login_no_exceptions(login_client):
 
 
 def test_login_exceptions(login_client):
-    """
-    Test case: Login with invalid email/password
-    Expect: Bad request form, 400
-    """
     # Email doesn't pass validation
     response = login_client.post('/auth', json={
         'email': 'admin',
         'password': '123456'
     })
+    json_data = response.get_json()
 
     assert response.status_code == StatusCodeEnum.BAD_REQUEST
+    assert json_data.get('error_code') == ErrorCodeEnum.VALIDATION_ERROR
 
     # Password doesn't pass validation
     response = login_client.post('/auth', json={
         'email': 'admin@gmail.com',
         'password': '123'
     })
+    json_data = response.get_json()
 
     assert response.status_code == StatusCodeEnum.BAD_REQUEST
+    assert json_data.get('error_code') == ErrorCodeEnum.VALIDATION_ERROR
 
     # Unregistered email
     response = login_client.post('/auth', json={
         'email': 'test@gmail.com',
         'password': '123456'
     })
+    json_data = response.get_json()
 
     assert response.status_code == StatusCodeEnum.BAD_REQUEST
+    assert json_data.get('error_code') == ErrorCodeEnum.FALSE_AUTHENTICATION
 
     # Wrong password
     response = login_client.post('/auth', json={
         'email': 'admin@gmail.com',
         'password': 'ferferf'
     })
+    json_data = response.get_json()
 
     assert response.status_code == StatusCodeEnum.BAD_REQUEST
+    assert json_data.get('error_code') == ErrorCodeEnum.FALSE_AUTHENTICATION

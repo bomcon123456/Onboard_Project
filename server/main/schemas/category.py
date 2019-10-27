@@ -8,6 +8,3 @@ class CategorySchema(Schema):
     creator_id = fields.Int(required=True)
     created = fields.DateTime(dump_only=True)
     updated = fields.DateTime(dump_only=True)
-
-    class Meta:
-        strict = True
