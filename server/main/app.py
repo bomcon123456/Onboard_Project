@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
 from main.controllers.auth import auth_api
@@ -18,7 +19,8 @@ def create_app(app_type):
 
     app.config.from_object(configs[app_type])
 
-    jwt = JWTManager(app)
+    JWTManager(app)
+    CORS(app)
 
     app.register_blueprint(error_handlers)
 
