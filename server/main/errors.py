@@ -28,7 +28,7 @@ class ErrorCodeEnum(IntEnum):
 
 class AppBaseException(Exception):
     """
-    BaseException class ( if we name the class BaseException, it will shadow the built-in exception)
+    BaseException class (if we name the class BaseException, it will shadow the built-in exception)
     - Simply made to name each exception so we can handle exception more precise
     """
     status_code = StatusCodeEnum.INTERNAL_SERVER_ERROR
@@ -130,7 +130,6 @@ def handle_invalid_form(error):
 @error_handlers.app_errorhandler(exc.IntegrityError)
 def handle_database_error(error):
     error_info = error.orig.args
-
     response = jsonify({
         'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
         'error_message': error_info[1]
@@ -138,11 +137,12 @@ def handle_database_error(error):
 
     return response, StatusCodeEnum.INTERNAL_SERVER_ERROR
 
-# @error_handlers.app_errorhandler(Exception)
-# def handle_other_errors(error):
-#     response = jsonify({
-#         'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
-#         'error_message': 'Something bad happened.'
-#     })
-#
-#     return response, StatusCodeEnum.INTERNAL_SERVER_ERROR
+
+@error_handlers.app_errorhandler(Exception)
+def handle_other_errors(error):
+    response = jsonify({
+        'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+        'error_message': 'Something bad happened.'
+    })
+
+    return response, StatusCodeEnum.INTERNAL_SERVER_ERROR

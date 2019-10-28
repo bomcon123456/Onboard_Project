@@ -1,7 +1,5 @@
 from marshmallow import Schema, fields
 
-# from main.schemas.category import CategorySchema
-# from main.schemas.item import ItemSchema
 from main.schemas.user import UserSchema
 
 

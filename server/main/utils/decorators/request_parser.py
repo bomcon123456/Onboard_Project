@@ -23,7 +23,7 @@ def request_parser(query_schema=None, body_schema=None):
                 query_params = query_schema.load(request.args)
             if body_schema is not None:
                 # If the mimetype does not indicate JSON this returns None.
-                json_data = request.get_json(silent=False)
+                json_data = request.get_json()
                 if json_data is None:
                     raise BadRequest(error_message='Please send a request consisting JSON body type.')
                 body_params = body_schema.load(json_data)

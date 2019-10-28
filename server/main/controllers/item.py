@@ -20,10 +20,10 @@ items_schema = ItemSchema(many=True)
 def gel_all_items(query_params):
     """
     GET all items with pagination
-
+    :param query_params:
     :queryparam page: page that client wants to get, default = 1
     :queryparam per_page: item per page that client wants to get, default = 5
-    :queryparam category_id: category to which the client wants to get the items belong
+    :queryparam category_id: Identifier or the category to which the items belong
 
     :raise ValidationError 400: When client passes invalid value for page, per_page
     :return: List of items, current_page, per_page, total.
@@ -74,8 +74,9 @@ def create_one_item(body_params):
     :bodyparam description: Description of the item
     :bodyparam category_id: Identifier of the category to which this item will belong
 
-    :raise: ValidationError 400: if form is messed up
+    :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: If try to create an existed object.
+    :raise BadRequest 400: if the body mimetype is not JSON
     :raise Unauthorized 401: If not login
     :raise NotFound 404: If category_id is not valid
     :return: the created item
@@ -100,7 +101,6 @@ def create_one_item(body_params):
 def update_one_item(item_id, body_params):
     """
     Update the item with id
-
     :param item_id: ID of the item we want to update
     :param body_params:
     :bodyparam title: Title of the item
@@ -108,12 +108,14 @@ def update_one_item(item_id, body_params):
 
     :raise ValidationError 400: if form is messed up
     :raise DuplicatedEntity 400: if there is a item with the title.
+    :raise BadRequest 400: if the body mimetype is not JSON
     :raise Unauthorized 401: If not login
     :raise Forbidden 403: If user tries to delete other user's items
     :raise NotFound 404: If category_id is not valid or item with id is not valid
     :return: the updated item
     """
     category_id = body_params.get('category_id')
+    # After SchemaValidation, category_id is either None or a number, None will pass through this test
     if category_id and Category.find_by_id(category_id) is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
 

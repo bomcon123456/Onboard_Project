@@ -16,10 +16,12 @@ auth_api = Blueprint('auth', __name__)
 def login(body_params):
     """
     POST Authenticate user
+    :param body_params:
     :bodyparam email: email of the user
     :bodyparam password: password of the user
 
     :raise ValidationError 400: If body of request is messed up
+    :raise BadRequest 400: if the body mimetype is not JSON
     :return: access_token and id, email of the newly created user
     """
     email = body_params.get('email')

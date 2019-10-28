@@ -21,11 +21,11 @@ categories_schema = CategorySchema(many=True)
 def get_all_categories(query_params):
     """
     Get all categories with pagination
-
+    :param query_params:
     :queryparam page: page that client wants to get, default = 1
-    :queryparam per_page: item per page that client wants to get, default = 5
+    :queryparam per_page: 'item' per page that client wants to get, default = 5
 
-    :raise Validation Error 400: When client passes invalid value for page, per_page
+    :raise ValidationError 400: When client passes invalid value for page, per_page
     :return: List of categories, current_page, per_page, total.
     """
     paginator = Category.query.paginate(page=query_params['page'],
@@ -64,11 +64,13 @@ def get_one_category(category_id):
 def create_one_category(body_params):
     """
     Create a category
+    :param body_params:
     :bodyparam title: Title of the category
     :bodyparam description: Description of the category
 
     :raise ValidationError 400: if form is messed up
-    :raise DuplicatedEntity 400: If try to create an existed object.
+    :raise DuplicatedEntity 400: If try to create an existed object
+    :raise BadRequest 400: if the body mimetype is not JSON
     :raise Unauthorized 401: If user is not login-ed
     :return: the created category
     """
@@ -96,7 +98,8 @@ def update_one_category(category_id, body_params):
     :bodyparam description: Description of the category
 
     :raise ValidationError 400: if form is messed up
-    :raise DuplicatedEntity 400: if there is a category with the title.
+    :raise DuplicatedEntity 400: if there is a category with the title
+    :raise BadRequest 400: if the body mimetype is not JSON
     :raise Unauthorized 401: If user is not login-ed
     :raise Forbidden 403: if user try to update other user's category
     :raise Not Found 404: If category with that id doesn't exist
@@ -108,7 +111,7 @@ def update_one_category(category_id, body_params):
 
     creator_id = get_jwt_identity()
     if creator_id != category.creator_id:
-        raise Forbidden('You can\'t update other users\'s category')
+        raise Forbidden(error_message='You can\'t update other users\'s category')
 
     title = body_params.get('title')
     description = body_params.get('description')
@@ -143,7 +146,7 @@ def delete_one_category(category_id):
 
     creator_id = get_jwt_identity()
     if creator_id != category.creator_id:
-        raise Forbidden('You can\'t delete other users\'s category')
+        raise Forbidden(error_message='You can\'t delete other users\'s category')
 
     db.session.query(Item).filter(Item.category_id == category_id).delete()  # delete all items in this category
     category.delete()

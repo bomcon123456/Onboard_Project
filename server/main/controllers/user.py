@@ -21,8 +21,9 @@ def register(body_params):
     :bodyparams: password: password of the user
 
     :raise ValidationError 400: If body of request is messed up
-    :raise DuplicatedEntity 400: If try to create an existed object.
-    :return: access_token and id of the newly created user
+    :raise DuplicatedEntity 400: If try to create an existed object
+    :raise BadRequest 400: if the body mimetype is not JSON
+    :return: access_token and {email, id} of the newly created user
     """
     email = body_params.get('email')
     if User.query.filter_by(email=email).first():
