@@ -131,7 +131,7 @@ def handle_invalid_form(error):
 def handle_database_error(error):
     error_info = error.orig.args
     response = jsonify({
-        'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+        'error_code': ErrorCodeEnum.INTERNAL_DATABASE_ERROR,
         'error_message': error_info[1]
     })
 

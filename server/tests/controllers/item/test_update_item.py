@@ -1,11 +1,13 @@
 from main.errors import StatusCodeEnum, ErrorCodeEnum
-from tests.helpers import assert_item_create_update_no_exceptions
+from tests.helpers import assert_item_create_update_no_exceptions, assert_status_error_code
 
 
 def test_update_item_no_exceptions(auth_client):
+    # Update with full params
     item_id = 1
     title = 'Minecrafty'
     description = 'Some description'
+    category_id = 2
 
     response = auth_client.put('/items/' + str(item_id), json={
         'title': title,
@@ -15,10 +17,12 @@ def test_update_item_no_exceptions(auth_client):
     data = response.get_json().get('data')
     category = data.get('category')
 
-    assert_item_create_update_no_exceptions(status_code=response.status_code, test_data=data, test_category=category,
-                                            original_title=title, original_description=description,
-                                            original_cat_id=1)
+    assert_item_create_update_no_exceptions(test_status_code=response.status_code, test_data=data,
+                                            test_category=category,
+                                            goal_title=title, goal_description=description,
+                                            goal_category_id=1)
 
+    # Update title only
     title = 'Cr@b'
     response = auth_client.put('/items/' + str(item_id), json={
         'title': title
@@ -26,10 +30,12 @@ def test_update_item_no_exceptions(auth_client):
     data = response.get_json().get('data')
     category = data.get('category')
 
-    assert_item_create_update_no_exceptions(status_code=response.status_code, test_data=data, test_category=category,
-                                            original_title=title, original_description=description,
-                                            original_cat_id=1)
+    assert_item_create_update_no_exceptions(test_status_code=response.status_code, test_data=data,
+                                            test_category=category,
+                                            goal_title=title, goal_description=description,
+                                            goal_category_id=1)
 
+    # Update description only
     description = 'Minecr@ft stuffs...'
     response = auth_client.put('/items/' + str(item_id), json={
         'description': description
@@ -37,9 +43,23 @@ def test_update_item_no_exceptions(auth_client):
     data = response.get_json().get('data')
     category = data.get('category')
 
-    assert_item_create_update_no_exceptions(status_code=response.status_code, test_data=data, test_category=category,
-                                            original_title=title, original_description=description,
-                                            original_cat_id=1)
+    assert_item_create_update_no_exceptions(test_status_code=response.status_code, test_data=data,
+                                            test_category=category,
+                                            goal_title=title, goal_description=description,
+                                            goal_category_id=1)
+
+    # Update category only
+    description = 'Minecr@ft stuffs...'
+    response = auth_client.put('/items/' + str(item_id), json={
+        'category_id': category_id
+    })
+    data = response.get_json().get('data')
+    category = data.get('category')
+
+    assert_item_create_update_no_exceptions(test_status_code=response.status_code, test_data=data,
+                                            test_category=category,
+                                            goal_title=title, goal_description=description,
+                                            goal_category_id=category_id)
 
 
 def test_update_item_exceptions(auth_client):
@@ -52,8 +72,9 @@ def test_update_item_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.DUPLICATED_ENTITY
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.DUPLICATED_ENTITY)
 
     # Not existed item
     item_id = 100
@@ -64,8 +85,9 @@ def test_update_item_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.NOT_FOUND
-    assert json_data['error_code'] == ErrorCodeEnum.NORMAL_NOT_FOUND
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.NOT_FOUND,
+                             goal_error_code=ErrorCodeEnum.NORMAL_NOT_FOUND)
 
     # Update another user's item
     item_id = 3
@@ -76,8 +98,9 @@ def test_update_item_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.FORBIDDEN
-    assert json_data['error_code'] == ErrorCodeEnum.NORMAL_FORBIDDEN
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.FORBIDDEN,
+                             goal_error_code=ErrorCodeEnum.NORMAL_FORBIDDEN)
 
     # Title is less than 4 characters
     item_id = 1
@@ -88,8 +111,9 @@ def test_update_item_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
     # Description is less than 4 characters
     title = 'Crab'
@@ -100,8 +124,10 @@ def test_update_item_exceptions(auth_client):
         'description': description
     })
     json_data = response.get_json()
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.VALIDATION_ERROR
+
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
     # Wrong params name
     title = 'Harry Potter'
@@ -113,5 +139,6 @@ def test_update_item_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)

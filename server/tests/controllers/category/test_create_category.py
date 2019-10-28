@@ -1,4 +1,5 @@
 from main.errors import StatusCodeEnum, ErrorCodeEnum
+from tests.helpers import assert_status_error_code
 
 
 def test_create_category_no_exceptions(auth_client):
@@ -27,8 +28,9 @@ def test_create_category_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.DUPLICATED_ENTITY
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.DUPLICATED_ENTITY)
 
     # Title is less than 4 characters
     title = 'Sea'
@@ -39,8 +41,9 @@ def test_create_category_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
     # Description is less than 4 characters
     title = 'Landie'
@@ -52,8 +55,9 @@ def test_create_category_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
     # Wrong params name
     title = 'Harry Potter'
@@ -65,14 +69,25 @@ def test_create_category_exceptions(auth_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
-    # Missing params (in this test we only test loosing title, but the same is applied for description)
+    # Missing params
     response = auth_client.post('/categories', json={
         'description': description
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data['error_code'] == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
+
+    response = auth_client.post('/categories', json={
+        'title': title
+    })
+    json_data = response.get_json()
+
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)

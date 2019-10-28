@@ -124,11 +124,27 @@ def get_category_by_id(category_id):
     return category
 
 
-def assert_item_create_update_no_exceptions(status_code, test_data, test_category, original_title, original_description,
-                                            original_cat_id):
-    assert status_code == StatusCodeEnum.OK
+def assert_item_create_update_no_exceptions(test_status_code, test_data, test_category, goal_title, goal_description,
+                                            goal_category_id):
+    assert test_status_code == StatusCodeEnum.OK
     assert test_data
-    assert test_data.get('title') == original_title
-    assert test_data.get('description') == original_description
+    assert test_data.get('title') == goal_title
+    assert test_data.get('description') == goal_description
     assert test_category
-    assert test_category.get('id') == original_cat_id
+    assert test_category.get('id') == goal_category_id
+
+
+def assert_status_error_code(test_status_code, test_error_code, goal_status_code, goal_error_code):
+    assert test_status_code == goal_status_code
+    assert test_error_code == goal_error_code
+
+
+def assert_pagination_response(test_status_code, test_data, test_total_items, test_page, test_per_page,
+                               goal_status_code, goal_total_items, goal_page, goal_per_page, goal_data_length=None):
+    assert test_status_code == goal_status_code
+    assert test_data is not None
+    if goal_data_length:
+        assert len(test_data) == goal_data_length
+    assert test_total_items == goal_total_items
+    assert test_page == goal_page
+    assert test_per_page == goal_per_page

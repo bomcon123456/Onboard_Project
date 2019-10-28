@@ -22,7 +22,7 @@ def gel_all_items(query_params):
     GET all items with pagination
     :param query_params:
     :queryparam page: page that client wants to get, default = 1
-    :queryparam per_page: item per page that client wants to get, default = 5
+    :queryparam per_page: items per page that client wants to get, default = 5
     :queryparam category_id: Identifier or the category to which the items belong
 
     :raise ValidationError 400: When client passes invalid value for page, per_page

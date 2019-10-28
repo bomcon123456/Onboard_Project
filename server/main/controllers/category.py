@@ -23,7 +23,7 @@ def get_all_categories(query_params):
     Get all categories with pagination
     :param query_params:
     :queryparam page: page that client wants to get, default = 1
-    :queryparam per_page: 'item' per page that client wants to get, default = 5
+    :queryparam per_page: 'items' per page that client wants to get, default = 5
 
     :raise ValidationError 400: When client passes invalid value for page, per_page
     :return: List of categories, current_page, per_page, total.

@@ -1,7 +1,7 @@
 from flask_jwt_extended import decode_token
 
 from main.errors import StatusCodeEnum, ErrorCodeEnum
-from tests.helpers import get_user_email
+from tests.helpers import get_user_email, assert_status_error_code
 
 
 def test_login_no_exceptions(login_client):
@@ -26,8 +26,9 @@ def test_login_exceptions(login_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data.get('error_code') == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
     # Password doesn't pass validation
     response = login_client.post('/auth', json={
@@ -36,8 +37,9 @@ def test_login_exceptions(login_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data.get('error_code') == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
     # Unregistered email
     response = login_client.post('/auth', json={
@@ -46,8 +48,9 @@ def test_login_exceptions(login_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data.get('error_code') == ErrorCodeEnum.FALSE_AUTHENTICATION
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.FALSE_AUTHENTICATION)
 
     # Wrong password
     response = login_client.post('/auth', json={
@@ -56,5 +59,6 @@ def test_login_exceptions(login_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data.get('error_code') == ErrorCodeEnum.FALSE_AUTHENTICATION
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.FALSE_AUTHENTICATION)

@@ -1,4 +1,5 @@
 from main.errors import StatusCodeEnum, ErrorCodeEnum
+from tests.helpers import assert_status_error_code
 
 
 def test_register_no_exceptions(plain_client):
@@ -24,8 +25,9 @@ def test_register_exceptions(login_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data.get('error_code') == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
     # Password doesn't pass validation
     response = login_client.post('/users', json={
@@ -34,8 +36,9 @@ def test_register_exceptions(login_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data.get('error_code') == ErrorCodeEnum.VALIDATION_ERROR
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.VALIDATION_ERROR)
 
     # Duplicated user email
     response = login_client.post('/users', json={
@@ -44,5 +47,6 @@ def test_register_exceptions(login_client):
     })
     json_data = response.get_json()
 
-    assert response.status_code == StatusCodeEnum.BAD_REQUEST
-    assert json_data.get('error_code') == ErrorCodeEnum.DUPLICATED_ENTITY
+    assert_status_error_code(test_status_code=response.status_code, test_error_code=json_data.get('error_code'),
+                             goal_status_code=StatusCodeEnum.BAD_REQUEST,
+                             goal_error_code=ErrorCodeEnum.DUPLICATED_ENTITY)
