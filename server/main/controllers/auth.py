@@ -22,7 +22,7 @@ def login(body_params):
 
     :raise ValidationError 400: If body of request is messed up
     :raise BadRequest 400: if the body mimetype is not JSON
-    :return: access_token and id, email of the newly created user
+    :return: access_token and {id, email} of the newly created user
     """
     email = body_params.get('email')
     password = body_params.get('password')
