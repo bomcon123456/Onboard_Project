@@ -1,3 +1,4 @@
+import logging
 from enum import IntEnum
 
 from flask import Blueprint, jsonify
@@ -130,6 +131,7 @@ def handle_invalid_form(error):
 @error_handlers.app_errorhandler(exc.IntegrityError)
 def handle_database_error(error):
     error_info = error.orig.args
+    logging.error(error_info)
     response = jsonify({
         'error_code': ErrorCodeEnum.INTERNAL_DATABASE_ERROR,
         'error_message': error_info[1]
@@ -140,6 +142,7 @@ def handle_database_error(error):
 
 @error_handlers.app_errorhandler(Exception)
 def handle_other_errors(error):
+    logging.error(error)
     response = jsonify({
         'error_code': ErrorCodeEnum.INTERNAL_SERVER_ERROR,
         'error_message': 'Something bad happened.'

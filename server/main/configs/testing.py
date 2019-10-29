@@ -1,6 +1,6 @@
 import os
 
-from main.configs.base_config import BaseConfig
+from main.configs.base import BaseConfig
 
 
 class TestingConfig(BaseConfig):

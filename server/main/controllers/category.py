@@ -3,8 +3,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from main.db import db
 from main.errors import NotFound, DuplicatedEntity, Forbidden, StatusCodeEnum
-from main.models.category import Category
-from main.models.item import Item
+from main.models.category import CategoryModel
+from main.models.item import ItemModel
 from main.schemas.category import CategorySchema
 from main.schemas.request import BasePaginationQuerySchema
 from main.schemas.response import create_pagination_response_schema
@@ -28,16 +28,10 @@ def get_all_categories(query_params):
     :raise ValidationError 400: When client passes invalid value for page, per_page
     :return: List of categories, current_page, per_page, total.
     """
-    paginator = Category.query.paginate(page=query_params['page'],
-                                        per_page=query_params['per_page'], error_out=False)
-    raw_response = {
-        'data': paginator.items,
-        'page': paginator.page,
-        'per_page': paginator.per_page,
-        'total_items': paginator.total
-    }
+    paginator = CategoryModel.query.paginate(page=query_params['page'],
+                                             per_page=query_params['per_page'], error_out=False)
 
-    return create_pagination_response_schema(data_schema=categories_schema).dump(raw_response)
+    return create_pagination_response_schema(data_schema=categories_schema).dump(paginator)
 
 
 @category_api.route('/categories/<int:category_id>', methods=['GET'])
@@ -49,7 +43,7 @@ def get_one_category(category_id):
     :raise Not Found 404: If category with that id doesn't exist
     :return: Category with that id
     """
-    category = Category.find_by_id(category_id)
+    category = CategoryModel.find_by_id(category_id)
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
 
@@ -74,11 +68,11 @@ def create_one_category(body_params):
     :raise Unauthorized 401: If user is not login-ed
     :return: the created category
     """
-    if Category.query.filter_by(title=body_params['title']).first():
+    if CategoryModel.query.filter_by(title=body_params['title']).first():
         raise DuplicatedEntity(error_message='Category with this title has already existed.')
 
     body_params['creator_id'] = get_jwt_identity()
-    category = Category(**body_params)
+    category = CategoryModel(**body_params)
     category.save()
 
     return {
@@ -105,7 +99,7 @@ def update_one_category(category_id, body_params):
     :raise Not Found 404: If category with that id doesn't exist
     :return: the updated category
     """
-    category = Category.find_by_id(category_id)
+    category = CategoryModel.find_by_id(category_id)
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
 
@@ -116,7 +110,7 @@ def update_one_category(category_id, body_params):
     title = body_params.get('title')
     description = body_params.get('description')
     if title:
-        if Category.query.filter_by(title=title).first():
+        if CategoryModel.query.filter_by(title=title).first():
             raise DuplicatedEntity(error_message='There is already a category with this title.')
         category.title = title
     if description:
@@ -140,7 +134,7 @@ def delete_one_category(category_id):
     :raise Not Found 404: If category with that id doesn't exist
     :return: 204 response
     """
-    category = Category.find_by_id(category_id)
+    category = CategoryModel.find_by_id(category_id)
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
 
@@ -148,7 +142,8 @@ def delete_one_category(category_id):
     if creator_id != category.creator_id:
         raise Forbidden(error_message='You can\'t delete other users\'s category')
 
-    db.session.query(Item).filter(Item.category_id == category_id).delete()  # delete all items in this category
+    db.session.query(ItemModel).filter(
+            ItemModel.category_id == category_id).delete()  # delete all items in this category
     category.delete()
 
     return {}, StatusCodeEnum.NO_CONTENT

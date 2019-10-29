@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask_jwt_extended import create_access_token
 
 from main.errors import DuplicatedEntity
-from main.models.user import User
+from main.models.user import UserModel
 from main.schemas.response import AuthResponseSchema
 from main.schemas.user import UserRegisterSchema
 from main.utils.decorators.request_parser import request_parser
@@ -26,10 +26,10 @@ def register(body_params):
     :return: access_token and {id, email} of the newly created user
     """
     email = body_params.get('email')
-    if User.query.filter_by(email=email).first():
+    if UserModel.query.filter_by(email=email).first():
         raise DuplicatedEntity(error_message='User with this email exists.')
 
-    user = User(**body_params)
+    user = UserModel(**body_params)
     user.save()
 
     access_token = create_access_token(identity=user.id)

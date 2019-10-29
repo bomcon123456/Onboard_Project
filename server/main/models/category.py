@@ -2,7 +2,7 @@ from main.db import db
 from main.models.base import BaseModel
 
 
-class Category(BaseModel, db.Model):
+class CategoryModel(BaseModel, db.Model):
     __tablename__ = 'categories'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -10,4 +10,4 @@ class Category(BaseModel, db.Model):
     description = db.Column(db.String(1000), nullable=False)
 
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    items = db.relationship('Item', backref='category', lazy='dynamic')
+    items = db.relationship('ItemModel', backref='category', lazy='dynamic')

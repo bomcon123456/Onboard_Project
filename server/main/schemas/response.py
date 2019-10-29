@@ -5,10 +5,10 @@ from main.schemas.user import UserSchema
 
 def create_pagination_response_schema(data_schema, instance=True):
     class PaginationResponseSchema(Schema):
-        data = fields.List(fields.Nested(data_schema), required=True)
-        per_page = fields.Int(required=True)
-        page = fields.Int(required=True)
-        total_items = fields.Int(required=True)
+        data = fields.List(fields.Nested(data_schema), required=True, attribute='items')
+        per_page = fields.Integer(required=True, attribute='per_page')
+        page = fields.Integer(required=True, attribute='page')
+        total_items = fields.Integer(required=True, attribute='total')
 
     if instance:
         return PaginationResponseSchema()

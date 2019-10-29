@@ -2,7 +2,7 @@ from main.db import db
 from main.models.base import BaseModel
 
 
-class Item(BaseModel, db.Model):
+class ItemModel(BaseModel, db.Model):
     __tablename__ = 'items'
 
     id = db.Column(db.Integer, primary_key=True)

@@ -1,8 +1,8 @@
 from main.db import db
 from main.errors import StatusCodeEnum
-from main.models.category import Category
-from main.models.item import Item
-from main.models.user import User
+from main.models.category import CategoryModel
+from main.models.item import ItemModel
+from main.models.user import UserModel
 
 
 def create_user(email, password):
@@ -12,7 +12,7 @@ def create_user(email, password):
     :param password: A string length >=4
     :return: user object
     """
-    user = User(email=email, password=password)
+    user = UserModel(email=email, password=password)
     user.save()
 
     return user
@@ -25,7 +25,7 @@ def create_category(title, description):
     :param description: A string length >=4
     :return: category object
     """
-    category = Category(title=title, description=description)
+    category = CategoryModel(title=title, description=description)
     category.save()
 
     return category
@@ -36,7 +36,7 @@ def create_categories(categories):
     Create user and save to database
     :param categories: list of categories (dict)
     """
-    category_objs = [Category(**cat) for cat in categories]
+    category_objs = [CategoryModel(**cat) for cat in categories]
     db.session.bulk_save_objects(category_objs)
     db.session.commit()
 
@@ -49,7 +49,7 @@ def create_item(title, description, cat_id):
     :param cat_id: category id
     :return: category object
     """
-    item = Item(title=title, description=description, category_id=cat_id)
+    item = ItemModel(title=title, description=description, category_id=cat_id)
     item.save()
 
     return item
@@ -60,7 +60,7 @@ def create_items(items):
     Create items and save to database
     :param items: list of items (dict)
     """
-    item_objs = [Item(**item) for item in items]
+    item_objs = [ItemModel(**item) for item in items]
     db.session.bulk_save_objects(item_objs)
     db.session.commit()
 
@@ -100,27 +100,27 @@ def create_test_db():
 
 
 def get_items_by_category_id(category_id):
-    items = Item.query.filter_by(category_id=category_id).all()
+    items = ItemModel.query.filter_by(category_id=category_id).all()
     return items
 
 
 def get_category_id_of_item(item_id):
-    item = Item.query.get(item_id)
+    item = ItemModel.query.get(item_id)
     return item.category.id
 
 
 def get_user_email(user_id):
-    user = User.query.get(user_id)
+    user = UserModel.query.get(user_id)
     return user.email
 
 
 def get_item_by_id(item_id):
-    item = Item.query.get(item_id)
+    item = ItemModel.query.get(item_id)
     return item
 
 
 def get_category_by_id(category_id):
-    category = Category.query.get(category_id)
+    category = CategoryModel.query.get(category_id)
     return category
 
 

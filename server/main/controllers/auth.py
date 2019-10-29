@@ -3,7 +3,7 @@ from flask_jwt_extended import create_access_token
 from passlib.hash import bcrypt
 
 from main.errors import FalseAuthentication
-from main.models.user import User
+from main.models.user import UserModel
 from main.schemas.response import AuthResponseSchema
 from main.schemas.user import UserRegisterSchema
 from main.utils.decorators.request_parser import request_parser
@@ -27,10 +27,8 @@ def login(body_params):
     email = body_params.get('email')
     password = body_params.get('password')
 
-    user = User.query.filter_by(email=email).first()
-    if user is None:
-        raise FalseAuthentication('Cant login with the provided information.')
-    if not bcrypt.verify(password, user.hashed_password):
+    user = UserModel.query.filter_by(email=email).first()
+    if user is None or not bcrypt.verify(password, user.hashed_password):
         raise FalseAuthentication('Cant login with the provided information.')
 
     access_token = create_access_token(identity=user.id)

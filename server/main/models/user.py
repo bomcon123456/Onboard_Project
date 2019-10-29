@@ -4,7 +4,7 @@ from main.db import db
 from main.models.base import BaseModel
 
 
-class User(BaseModel, db.Model):
+class UserModel(BaseModel, db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -12,7 +12,7 @@ class User(BaseModel, db.Model):
     hashed_password = db.Column(db.CHAR(60), nullable=False)
 
     # lazy='dynamic' will return a query object, so we can do more operation like filter_by,...
-    items = db.relationship('Item', lazy='dynamic')
+    items = db.relationship('ItemModel', lazy='dynamic')
 
     def __init__(self, **kwargs):
         """
