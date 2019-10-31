@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from main.db import db
@@ -9,6 +9,7 @@ from main.schemas.category import CategorySchema
 from main.schemas.request import BasePaginationQuerySchema
 from main.schemas.response import create_pagination_response_schema
 from main.utils.decorators.request_parser import request_parser
+from main.utils.response_helpers import create_data_response
 
 category_api = Blueprint('category', __name__)
 
@@ -18,7 +19,7 @@ categories_schema = CategorySchema(many=True)
 
 @category_api.route('/categories', methods=['GET'])
 @request_parser(query_schema=BasePaginationQuerySchema())
-def get_all_categories(query_params):
+def get_categories(query_params):
     """
     Get all categories with pagination
     :param query_params:
@@ -35,7 +36,7 @@ def get_all_categories(query_params):
 
 
 @category_api.route('/categories/<int:category_id>', methods=['GET'])
-def get_one_category(category_id):
+def get_category(category_id):
     """
     Get the category by id
     :param category_id: id of the category want to get
@@ -47,15 +48,13 @@ def get_one_category(category_id):
     if category is None:
         raise NotFound(error_message='Category with this id doesn\'t exist.')
 
-    return {
-        'data': category_schema.dump(category)
-    }
+    return create_data_response(category_schema.dump(category))
 
 
 @category_api.route('/categories', methods=['POST'])
 @jwt_required
 @request_parser(body_schema=CategorySchema(exclude=['creator_id']))
-def create_one_category(body_params):
+def create_category(body_params):
     """
     Create a category
     :param body_params:
@@ -75,15 +74,13 @@ def create_one_category(body_params):
     category = CategoryModel(**body_params)
     category.save()
 
-    return {
-        'data': category_schema.dump(category)
-    }
+    return create_data_response(category_schema.dump(category))
 
 
 @category_api.route('/categories/<int:category_id>', methods=['PUT'])
 @jwt_required
 @request_parser(body_schema=CategorySchema(partial=True))  # partial is fine because fields have validate property
-def update_one_category(category_id, body_params):
+def update_category(category_id, body_params):
     """
     Update the category with id
     :param category_id: ID of the category we want to update
@@ -117,14 +114,12 @@ def update_one_category(category_id, body_params):
         category.description = description
     category.save()
 
-    return {
-        'data': category_schema.dump(category)
-    }
+    return create_data_response(category_schema.dump(category))
 
 
 @category_api.route('/categories/<int:category_id>', methods=['DELETE'])
 @jwt_required
-def delete_one_category(category_id):
+def delete_category(category_id):
     """
     Delete the category with id
     :param category_id: ID of the category we want to delete
@@ -146,4 +141,4 @@ def delete_one_category(category_id):
             ItemModel.category_id == category_id).delete()  # delete all items in this category
     category.delete()
 
-    return {}, StatusCodeEnum.NO_CONTENT
+    return Response(status=StatusCodeEnum.NO_CONTENT)

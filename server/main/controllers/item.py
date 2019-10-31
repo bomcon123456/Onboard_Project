@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from main.errors import NotFound, DuplicatedEntity, Forbidden, StatusCodeEnum
@@ -8,6 +8,7 @@ from main.schemas.item import ItemSchema
 from main.schemas.request import ItemPaginationQuerySchema
 from main.schemas.response import create_pagination_response_schema
 from main.utils.decorators.request_parser import request_parser
+from main.utils.response_helpers import create_data_response
 
 item_api = Blueprint('item', __name__)
 
@@ -17,7 +18,7 @@ items_schema = ItemSchema(many=True)
 
 @item_api.route('/items', methods=['GET'])
 @request_parser(query_schema=ItemPaginationQuerySchema())
-def gel_all_items(query_params):
+def get_items(query_params):
     """
     GET all items with pagination
     :param query_params:
@@ -40,7 +41,7 @@ def gel_all_items(query_params):
 
 
 @item_api.route('/items/<int:item_id>', methods=['GET'])
-def get_one_item(item_id):
+def get_item(item_id):
     """
     Get the item with id
     :param item_id: id of the category
@@ -52,15 +53,13 @@ def get_one_item(item_id):
     if item is None:
         raise NotFound(error_message='Item with this id doesn\'t exist.')
 
-    return {
-        'data': item_schema.dump(item)
-    }
+    return create_data_response(item_schema.dump(item))
 
 
 @item_api.route('/items', methods=['POST'])
 @jwt_required
 @request_parser(body_schema=ItemSchema(exclude=['creator_id']))
-def create_one_item(body_params):
+def create_item(body_params):
     """
     Create an item
     :param body_params:
@@ -84,15 +83,13 @@ def create_one_item(body_params):
     item = ItemModel(**body_params)
     item.save()
 
-    return {
-        'data': item_schema.dump(item)
-    }
+    return create_data_response(item_schema.dump(item))
 
 
 @item_api.route('/items/<int:item_id>', methods=['PUT'])
 @jwt_required
 @request_parser(body_schema=ItemSchema(partial=True))
-def update_one_item(item_id, body_params):
+def update_item(item_id, body_params):
     """
     Update the item with id
     :param item_id: ID of the item we want to update
@@ -131,14 +128,12 @@ def update_one_item(item_id, body_params):
         item.category_id = category_id
     item.save()
 
-    return {
-        'data': item_schema.dump(item)
-    }
+    return create_data_response(item_schema.dump(item))
 
 
 @item_api.route('/items/<int:item_id>', methods=['DELETE'])
 @jwt_required
-def delete_one_item(item_id):
+def delete_item(item_id):
     """
     Delete the item with id
     :param item_id: ID of the item we want to delete
@@ -155,4 +150,4 @@ def delete_one_item(item_id):
         raise Forbidden(error_message='You can\'t delete other users\'s item')
     item.delete()
 
-    return {}, StatusCodeEnum.NO_CONTENT
+    return Response(status=StatusCodeEnum.NO_CONTENT)
